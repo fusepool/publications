@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" xml:base="../dtds/">
+  <public publicId="-//NLM//DTD Journal Archiving and Interchange DTD v2.3 20070202//EN" uri="archive-interchange-dtd-2.3/archivearticle.dtd"/>
+  <public publicId="-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD v1.0 20120330//EN" uri="jats-archiving-dtd-1.0/JATS-archivearticle1.dtd"/>
+</catalog>
