@@ -26,12 +26,13 @@
     <xsl:variable name="uriThingSeparator" select="'/'"/>
 
     <xsl:variable name="provenance" select="concat($baseURI, 'provenance', $uriThingSeparator)"/>
-    <xsl:variable name="concept" select="concat($baseURI, 'concept', $uriThingSeparator)"/>
+    <xsl:variable name="concept" select="concat($baseURI, 'concept/')"/>
     <xsl:variable name="code" select="concat($baseURI, 'code/')"/>
     <xsl:variable name="class" select="concat($baseURI, 'class', $uriThingSeparator)"/>
     <xsl:variable name="property" select="concat($baseURI, 'property', $uriThingSeparator)"/>
     <xsl:variable name="dataset" select="concat($baseURI, 'dataset/')"/>
     <xsl:variable name="pubmed" select="concat($baseURI, 'pubmed/')"/>
+    <xsl:variable name="conceptPubMed" select="concat($concept, 'pubmed')"/>
     <xsl:variable name="provDocument" select="document($pathToProvDocument)/rdf:RDF"/>
 <!-- CONFIG END -->
 
