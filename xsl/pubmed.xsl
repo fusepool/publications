@@ -41,9 +41,6 @@
 
     <xsl:template match="/article">
         <rdf:RDF>
-<!--            <xsl:variable name="pmid" select="front/article-meta/article-id[@pub-id-type='pmid']"/>-->
-            <xsl:variable name="pmid" select="key('pub-id-type', 'pmid')"/>
-
             <xsl:apply-templates select="front"/>
             <xsl:apply-templates select="back"/>
         </rdf:RDF>
@@ -212,25 +209,24 @@
                     <rdf:Description rdf:about="{$pmid-cites}">
                         <rdf:type rdf:resource="{$bibo}Document"/>
                         <bibo:citedBy rdf:resource="{concat($pubmed, $pmid)}"/>
+
+                        <xsl:for-each select="person-group/name">
+                            <dcterms:contributor>
+                                <xsl:variable name="contributor" select="concat($entityID, uuid:randomUUID())"/>
+                                <rdf:Description rdf:about="{$contributor}">
+                                    <rdf:type rdf:resource="{$foaf}Person"/>
+
+                                    <foaf:publications rdf:resource="{$pmid-cites}"/>
+
+                                    <xsl:apply-templates select="given-names"/>
+                                    <xsl:apply-templates select="surname"/>
+                                    <xsl:apply-templates select="prefix"/>
+                                    <xsl:apply-templates select="suffix"/>
+                                </rdf:Description>
+                            </dcterms:contributor>
+                        </xsl:for-each>
                     </rdf:Description>
                 </bibo:cites>
-
-                <xsl:variable name="contributor" select="concat($entityID, uuid:randomUUID())"/>
-
-                <xsl:for-each select="person-group/name">
-                    <dcterms:contributor>
-                        <rdf:Description rdf:about="{$contributor}">
-                            <rdf:type rdf:resource="{$foaf}Person"/>
-
-                            <foaf:publications rdf:resource="{$pmid-cites}"/>
-
-                            <xsl:apply-templates select="given-names"/>
-                            <xsl:apply-templates select="surname"/>
-                            <xsl:apply-templates select="prefix"/>
-                            <xsl:apply-templates select="suffix"/>
-                        </rdf:Description>
-                    </dcterms:contributor>
-                </xsl:for-each>
             </rdf:Description>
         </xsl:for-each>
     </xsl:template>
