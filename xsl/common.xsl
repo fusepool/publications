@@ -32,6 +32,7 @@
     <xsl:variable name="property" select="concat($baseURI, 'property', $uriThingSeparator)"/>
     <xsl:variable name="dataset" select="concat($baseURI, 'dataset/')"/>
     <xsl:variable name="pubmed" select="concat($baseURI, 'pubmed/')"/>
+    <xsl:variable name="journal" select="concat($baseURI, 'journal/')"/>
     <xsl:variable name="ncbipmc" select="'http://www.ncbi.nlm.nih.gov/pmc/articles/'"/>
     <xsl:variable name="doi" select="'http://dx.doi.org/'"/>
 
@@ -131,7 +132,7 @@
         <xsl:param name="date"/>
 
         <xsl:analyze-string select="$date" regex="([0-9]{{4}})([0-9]{{2}})([0-9]{{2}})">
-            <xsl:matching-substring>                
+            <xsl:matching-substring>
                 <xsl:call-template name="rdfDatatypeXSD">
                     <xsl:with-param name="type" select="'date'"/>
                 </xsl:call-template>

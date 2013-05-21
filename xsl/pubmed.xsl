@@ -24,7 +24,7 @@
 
     xmlns:uuid="java:java.util.UUID"
 
-    exclude-result-prefixes="xsl fn uuid"
+    exclude-result-prefixes="xsl fn uuid xlink"
     >
     <xsl:import href="common.xsl"/>
 
@@ -56,15 +56,51 @@
         <rdf:Description rdf:about="{concat($pubmed, $pmid)}">
             <rdf:type rdf:resource="{$bibo}Document"/>
 
-<!--        <xsl:apply-templates name="journal-meta"/>-->
+            <xsl:apply-templates select="journal-meta"/>
             <xsl:apply-templates select="article-meta"/>
         </rdf:Description>
     </xsl:template>
 
     <xsl:template match="journal-meta">
-        <xsl:for-each select="issn">
-            <bibo:issn><xsl:value-of select="@epub"/></bibo:issn>
-        </xsl:for-each>
+        <xsl:variable name="pmid" select="key('pub-id-type', 'pmid')"/>
+        <xsl:variable name="issn" select="normalize-space(issn[@pub-type='epub'])"/>
+
+        <xsl:variable name="issue" select="normalize-space(../article-meta/issue)"/>
+
+        <xsl:variable name="issuePath">
+            <xsl:if test="$issue != ''">
+                <xsl:value-of select="concat($uriThingSeparator, $issue)"/>
+            </xsl:if>
+        </xsl:variable>
+
+        <xsl:variable name="journalURL" select="concat($journal, $issn)"/>
+        <xsl:variable name="issueURL" select="concat($journalURL, $issuePath)"/>
+
+        <dcterms:isPartOf>
+            <rdf:Description rdf:about="{$issueURL}">
+                <rdf:type rdf:resource="{$bibo}Issue"/>
+                <dcterms:hasPart rdf:resource="{concat($pubmed, $pmid)}"/>
+                <bibo:issue><xsl:value-of select="$issue"/></bibo:issue>
+
+                <xsl:if test="$issue != ''">
+                    <dcterms:isPartOf>
+                        <rdf:Description rdf:about="{$journalURL}">
+                            <rdf:type rdf:resource="{$bibo}Journal"/>
+                            <dcterms:hasPart rdf:resource="{$issueURL}"/>
+                            <dcterms:identifier rdf:resource="urn:issn:{$issn}"/>
+                            <dcterms:title><xsl:value-of select="journal-title-group/journal-title"/></dcterms:title>
+                            <bibo:issn><xsl:value-of select="$issn"/></bibo:issn>
+                            <dcterms:publisher>
+                                <rdf:Description rdf:about="{concat($entityID, uuid:randomUUID())}">
+                                    <rdf:type rdf:resource="{$foaf}Agent"/>
+                                    <foaf:name><xsl:value-of select="publisher/publisher-name"/></foaf:name>
+                                </rdf:Description>
+                            </dcterms:publisher>
+                        </rdf:Description>
+                    </dcterms:isPartOf>
+                </xsl:if>
+            </rdf:Description>
+        </dcterms:isPartOf>
     </xsl:template>
 
     <xsl:template match="article-meta">
@@ -104,7 +140,6 @@
         <xsl:apply-templates select="kwd-group/kwd"/>
 
         <xsl:apply-templates select="volume"/>
-        <xsl:apply-templates select="issue"/>
         <xsl:apply-templates select="fpage"/>
         <xsl:apply-templates select="lpage"/>
         <xsl:apply-templates select="counts/page-count/@count"/>
@@ -207,9 +242,7 @@
     <xsl:template match="volume">
         <bibo:volume><xsl:value-of select="."/></bibo:volume>
     </xsl:template>
-    <xsl:template match="issue">
-        <bibo:issue><xsl:value-of select="."/></bibo:issue>
-    </xsl:template>
+
     <xsl:template match="fpage">
         <bibo:pageStart><xsl:value-of select="."/></bibo:pageStart>
     </xsl:template>
@@ -221,7 +254,7 @@
     </xsl:template>
 
     <xsl:template match="abstract">
-        <dcterms:abstract><xsl:value-of select="*/text()"/></dcterms:abstract>
+        <dcterms:abstract><xsl:value-of select="descendant-or-self::p/text()"/></dcterms:abstract>
     </xsl:template>
     <xsl:template match="permissions/license/@xlink:href">
         <dcterms:license rdf:resource="{normalize-space(.)}"/>
