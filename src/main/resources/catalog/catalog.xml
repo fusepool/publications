@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+<catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" xml:base="../dtd/">
+  <public publicId="-//NLM//DTD Journal Archiving and Interchange DTD v2.3 20070202//EN" uri="archivearticle.dtd"/>
+  <public publicId="-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD v1.0 20120330//EN" uri="JATS-archivearticle1.dtd"/>
+  
+  	<public
+		publicId="-//NLM//DTD JATS (Z39.96) Journal Archiving DTD-Specific Modules v1.0 20120330//EN"
+		uri="JATS-archivecustom-modules1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Module of Modules v1.0 20120330//EN"
+		uri="JATS-modules1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) Journal Archiving DTD Customize Classes Module v1.0 20120330//EN"
+		uri="JATS-archivecustom-classes1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) Default Element Classes Module v1.0 20120330//EN"
+		uri="JATS-default-classes1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) Journal Archiving DTD Customize Mixes Module v1.0 20120330//EN"
+		uri="JATS-archivecustom-mixes1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) Default Element Mixes Module v1.0 20120330//EN"
+		uri="JATS-default-mixes1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) Journal Archiving DTD Customize Content and Attributes Module v1.0 20120330//EN"
+		uri="JATS-archivecustom-models1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Common (Shared) Elements Module v1.0 20120330//EN"
+		uri="JATS-common1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Journal Article Metadata Elements v1.0 20120330//EN"
+		uri="JATS-articlemeta1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Back Matter Elements v1.0 20120330//EN"
+		uri="JATS-backmatter1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Display Class Elements v1.0 20120330//EN"
+		uri="JATS-display1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Formatting Element Classes v1.0 20120330//EN"
+		uri="JATS-format1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Funding Elements v1.0 20120330//EN"
+		uri="JATS-funding1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Journal Metadata Elements v1.0 20120330//EN"
+		uri="JATS-journalmeta1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Link Class Elements v1.0 20120330//EN"
+		uri="JATS-link1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Math Class Elements v1.0 20120330//EN"
+		uri="JATS-math1.ent" />
+	<public publicId="-//NLM//DTD JATS (Z39.96) NLM Citation v1.0 20120330//EN"
+		uri="JATS-nlmcitation1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Paragraph-Like Elements v1.0 20120330//EN"
+		uri="JATS-para1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Subject Phrase Class Elements v1.0 20120330//EN"
+		uri="JATS-phrase1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Bibliographic Reference (Citation) Class Elements v1.0 20120330//EN"
+		uri="JATS-references1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Related Object Element v1.0 20120330//EN"
+		uri="JATS-related-object1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Section Class Elements v1.0 20120330//EN"
+		uri="JATS-section1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite MathML Setup Module v1.0 20120330//EN"
+		uri="JATS-mathmlsetup1.ent" />
+	<public publicId="-//W3C//ENTITIES Extra for MathML 2.0//EN"
+		uri="mathml/mmlextra.ent" />
+	<public publicId="-//W3C//ENTITIES Aliases for MathML 2.0//EN"
+		uri="mathml/mmlalias.ent" />
+	<public publicId="-//W3C//DTD MathML 2.0//EN" uri="mathml2.dtd" />
+	<public publicId="-//W3C//ENTITIES MathML 2.0 Qualified Names 1.0//EN"
+		uri="mathml2-qname-1.mod" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite XHTML Table Setup Module v1.0 20120330//EN"
+		uri="JATS-XHTMLtablesetup1.ent" />
+	<public publicId="-//W3C//ENTITIES XHTML Inline Style 1.0//EN"
+		uri="xhtml-inlstyle-1.mod" />
+	<public publicId="-//W3C//ELEMENTS XHTML Tables 1.0//EN" uri="xhtml-table-1.mod" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite XML Special Characters Module v1.0 20120330//EN"
+		uri="JATS-xmlspecchars1.ent" />
+	<public publicId="-//W3C//ENTITIES Added Latin 1 for MathML 2.0//EN"
+		uri="iso8879/isolat1.ent" />
+	<public publicId="-//W3C//ENTITIES Added Latin 2 for MathML 2.0//EN"
+		uri="iso8879/isolat2.ent" />
+	<public publicId="-//W3C//ENTITIES Box and Line Drawing for MathML 2.0//EN"
+		uri="iso8879/isobox.ent" />
+	<public publicId="-//W3C//ENTITIES Diacritical Marks for MathML 2.0//EN"
+		uri="iso8879/isodia.ent" />
+	<public
+		publicId="-//W3C//ENTITIES Numeric and Special Graphic for MathML 2.0//EN"
+		uri="iso8879/isonum.ent" />
+	<public publicId="-//W3C//ENTITIES Publishing for MathML 2.0//EN"
+		uri="iso8879/isopub.ent" />
+	<public publicId="-//W3C//ENTITIES Russian Cyrillic for MathML 2.0//EN"
+		uri="iso8879/isocyr1.ent" />
+	<public publicId="-//W3C//ENTITIES Non-Russian Cyrillic for MathML 2.0//EN"
+		uri="iso8879/isocyr2.ent" />
+	<public publicId="-//W3C//ENTITIES Greek Letters//EN" uri="xmlchars/isogrk1.ent" />
+	<public publicId="-//W3C//ENTITIES Monotoniko Greek//EN" uri="xmlchars/isogrk2.ent" />
+	<public publicId="-//W3C//ENTITIES Alternative Greek Symbols//EN"
+		uri="xmlchars/isogrk4.ent" />
+	<public publicId="-//W3C//ENTITIES General Technical for MathML 2.0//EN"
+		uri="iso9573-13/isotech.ent" />
+	<public publicId="-//W3C//ENTITIES Greek Symbols for MathML 2.0//EN"
+		uri="iso9573-13/isogrk3.ent" />
+	<public
+		publicId="-//W3C//ENTITIES Added Math Symbols: Arrow Relations for MathML 2.0//EN"
+		uri="iso9573-13/isoamsa.ent" />
+	<public
+		publicId="-//W3C//ENTITIES Added Math Symbols: Binary Operators for MathML 2.0//EN"
+		uri="iso9573-13/isoamsb.ent" />
+	<public
+		publicId="-//W3C//ENTITIES Added Math Symbols: Delimiters for MathML 2.0//EN"
+		uri="iso9573-13/isoamsc.ent" />
+	<public
+		publicId="-//W3C//ENTITIES Added Math Symbols: Negated Relations for MathML 2.0//EN"
+		uri="iso9573-13/isoamsn.ent" />
+	<public
+		publicId="-//W3C//ENTITIES Added Math Symbols: Ordinary for MathML 2.0//EN"
+		uri="iso9573-13/isoamso.ent" />
+	<public
+		publicId="-//W3C//ENTITIES Added Math Symbols: Relations for MathML 2.0//EN"
+		uri="iso9573-13/isoamsr.ent" />
+	<public publicId="-//W3C//ENTITIES Math Alphabets: Script for MathML 2.0//EN"
+		uri="iso9573-13/isomscr.ent" />
+	<public publicId="-//W3C//ENTITIES Math Alphabets: Fraktur for MathML 2.0//EN"
+		uri="iso9573-13/isomfrk.ent" />
+	<public publicId="-//W3C//ENTITIES Math Alphabets: Open Face for MathML 2.0//EN"
+		uri="iso9573-13/isomopf.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Custom Special Characters Module v1.0 20120330//EN"
+		uri="JATS-chars1.ent" />
+	<public
+		publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite Notation Declarations v1.0 20120330//EN"
+		uri="JATS-notat1.ent" />
+	<public publicId="-//NLM//DTD JATS (Z39.96) JATS DTD Suite List Class Elements v1.0 20120330//EN" uri="JATS-list1.ent" />
+</catalog>
