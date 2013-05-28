@@ -16,6 +16,7 @@ import org.xml.sax.ext.EntityResolver2;
  * @author giorgio
  *
  */
+@Deprecated
 public class DTDResolver implements EntityResolver2 {
 
 	

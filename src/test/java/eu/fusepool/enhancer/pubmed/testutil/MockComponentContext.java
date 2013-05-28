@@ -39,6 +39,10 @@ public class MockComponentContext implements ComponentContext {
 
     protected final Dictionary<String, Object> properties;
 
+    public static String BUNDLE_TEST_DATA_FOLDER = "bundle-testdata"+File.separator ;
+    
+    
+    
     public MockComponentContext() {
         properties = new Hashtable<String, Object>();
     }
@@ -127,7 +131,7 @@ public class MockComponentContext implements ComponentContext {
 
             @Override
             public File getDataFile(String filename) {
-            	final String bundleDataFolderName ="."+File.separator+"bundle-testdata/" ;
+            	final String bundleDataFolderName ="."+File.separator+BUNDLE_TEST_DATA_FOLDER ;
             	
             	if(bundleDataFolder==null) {
             		bundleDataFolder = new File(bundleDataFolderName) ;

@@ -7,6 +7,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -27,7 +28,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import eu.fusepool.enhancer.pubmed.testutil.MockComponentContext;
-import eu.fusepool.enhancer.pubmed.testutil.MockLogService;
 
 /**
  * @author giorgio
@@ -54,7 +54,6 @@ public class PubMedLifterEnhancementEngineTest {
 		ctx = new MockComponentContext(properties) ;
 
 		engine = new PubMedLifterEnhancementEngine() ;
-		engine.logService = new MockLogService() ;
 		engine.parser = Parser.getInstance() ;
 		//Set<String> supportedFormats = engine.parser.getSupportedFormats() ;
 		engine.activate(ctx) ;
@@ -63,6 +62,9 @@ public class PubMedLifterEnhancementEngineTest {
 	@AfterClass 
 	public static void clean() {
 		engine.deactivate(ctx) ;
+		File test_data_folder = new File(MockComponentContext.BUNDLE_TEST_DATA_FOLDER) ;
+		if(test_data_folder.exists() && test_data_folder.isDirectory())
+			test_data_folder.delete() ;
 	}
 
 
