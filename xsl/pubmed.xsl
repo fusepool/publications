@@ -142,22 +142,58 @@
         <xsl:apply-templates select="counts/page-count/@count"/>
         <xsl:apply-templates select="permissions/license/@xlink:href"/>
 
+        <xsl:variable name="affiliations">
+            <rdf:RDF>
+                <xsl:for-each select="//aff">
+                    <rdf:Description rdf:about="{concat($entityID, uuid:randomUUID())}">
+                        <rdf:type rdf:resource="{$foaf}Organization"/>
+                        <rdfs:value><xsl:value-of select="@id"/></rdfs:value>
+
+                        <xsl:choose>
+                            <xsl:when test="institution or addr-line or country or fax or phone or email or uri">
+                                <xsl:apply-templates select="institution"/>
+                                <xsl:apply-templates select="email"/>
+                                <xsl:if test="uri">
+                                    <foaf:homepage rdf:resource="normalize-space(uri)"/>
+                                </xsl:if>
+
+                                <xsl:if test="addr-line or country or fax or phone">
+                                    <schema:address>
+                                        <rdf:Description rdf:about="{concat($entityID, uuid:randomUUID())}">
+                                            <rdf:type rdf:resource="{$schema}PostalAddress"/>
+
+                                            <xsl:apply-templates select="addr-line"/>
+                                            <xsl:apply-templates select="fax"/>
+                                            <xsl:apply-templates select="phone"/>
+                                        </rdf:Description>
+                                    </schema:address>
+                                </xsl:if>
+                            </xsl:when>
+
+                            <xsl:otherwise>
+                                <foaf:name><xsl:value-of select="."/></foaf:name>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </rdf:Description>
+                </xsl:for-each>
+            </rdf:RDF>
+        </xsl:variable>
+
         <xsl:for-each select="contrib-group/contrib">
             <xsl:call-template name="contributor">
                 <xsl:with-param name="pub-id-type" select="'pmid'"/>
                 <xsl:with-param name="pub-id" select="key('pub-id-type', 'pmid')"/>
+                <xsl:with-param name="affiliations" select="$affiliations"/>
             </xsl:call-template>
         </xsl:for-each>
     </xsl:template>
 
 
-
     <xsl:template name="contributor">
         <xsl:param name="pub-id-type"/>
         <xsl:param name="pub-id"/>
-<!--        <xsl:variable name="pmid" select="key('pub-id-type', 'pmid')"/>-->
-<!--        <xsl:variable name="pmc" select="key('pub-id-type', 'pmc')"/>-->
-<!--        <xsl:variable name="contrib-type" select="@contrib-type"/>-->
+        <xsl:param name="affiliations"/>
+
         <xsl:variable name="contributor" select="concat($entityID, uuid:randomUUID())"/>
 
         <dcterms:contributor>
@@ -179,9 +215,15 @@
                     <xsl:apply-templates select="email"/>
                 </xsl:for-each>
 
-<!--                <xsl:for-each select="xref">-->
-<!--                    <xsl:apply-templates select="@ref-type = 'aff'"/>-->
-<!--                </xsl:for-each>-->
+                <xsl:for-each select="xref">
+<!--TODO: @ref-type = 'corresp'-->
+
+                    <xsl:variable name="rid" select="@rid"/>
+
+                    <schema:affiliation>
+                        <xsl:copy-of select="$affiliations/rdf:RDF/rdf:Description[rdfs:value=$rid]"/>
+                    </schema:affiliation>
+                </xsl:for-each>
             </rdf:Description>
         </dcterms:contributor>
     </xsl:template>
@@ -273,7 +315,9 @@
         </dcterms:subject>
     </xsl:template>
 
-
+    <xsl:template match="institution">
+        <foaf:name><xsl:value-of select="."/></foaf:name>
+    </xsl:template>
     <xsl:template match="given-names">
         <foaf:firstName><xsl:value-of select="."/></foaf:firstName>
     </xsl:template>
@@ -295,7 +339,7 @@
     <xsl:template match="email">
         <foaf:mbox rdf:resource="mailto:{normalize-space(.)}"/>
     </xsl:template>
-<!--        <xsl:template match="xref">-->
-<!--            <schema:affiliation><xsl:value-of select="key('aff', @rid)"/></schema:affiliation>-->
-<!--        </xsl:template>-->
+    <xsl:template match="addr-line">
+        <schema:streetAddress><xsl:value-of select="."/></schema:streetAddress>
+    </xsl:template>
 </xsl:stylesheet>
