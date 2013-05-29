@@ -50,12 +50,52 @@
     <xsl:template match="front">
         <xsl:variable name="pmid" select="key('pub-id-type', 'pmid')"/>
 
+        <xsl:variable name="affiliations">
+            <rdf:RDF>
+                <xsl:for-each select="//aff">
+                    <rdf:Description rdf:about="{concat($entityID, uuid:randomUUID())}">
+                        <rdf:type rdf:resource="{$foaf}Organization"/>
+                        <rdfs:value><xsl:value-of select="@id"/></rdfs:value>
+
+                        <xsl:choose>
+                            <xsl:when test="institution or addr-line or country or fax or phone or email or uri">
+                                <xsl:apply-templates select="institution"/>
+                                <xsl:apply-templates select="email"/>
+                                <xsl:if test="uri">
+                                    <foaf:homepage rdf:resource="normalize-space(uri)"/>
+                                </xsl:if>
+
+                                <xsl:if test="addr-line or country or fax or phone">
+                                    <schema:address>
+                                        <rdf:Description rdf:about="{concat($entityID, uuid:randomUUID())}">
+                                            <rdf:type rdf:resource="{$schema}PostalAddress"/>
+
+                                            <xsl:apply-templates select="addr-line"/>
+                                            <xsl:apply-templates select="fax"/>
+                                            <xsl:apply-templates select="phone"/>
+                                        </rdf:Description>
+                                    </schema:address>
+                                </xsl:if>
+                            </xsl:when>
+
+                            <xsl:otherwise>
+                                <foaf:name><xsl:value-of select="."/></foaf:name>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </rdf:Description>
+                </xsl:for-each>
+            </rdf:RDF>
+        </xsl:variable>
+
         <rdf:Description rdf:about="{concat($pubmed, $pmid)}">
             <rdf:type rdf:resource="{$bibo}Document"/>
 
             <xsl:apply-templates select="journal-meta"/>
-            <xsl:apply-templates select="article-meta"/>
+            <xsl:call-template name="article-meta">
+                <xsl:with-param name="affiliations" select="$affiliations" tunnel="yes"/>
+            </xsl:call-template>
         </rdf:Description>
+        <xsl:copy-of select="$affiliations/rdf:RDF/*"/>
     </xsl:template>
 
     <xsl:template match="journal-meta">
@@ -100,91 +140,58 @@
         </dcterms:isPartOf>
     </xsl:template>
 
-    <xsl:template match="article-meta">
-        <xsl:for-each select="article-id">
-            <xsl:variable name="pub-id-type" select="@pub-id-type"/>
-            <xsl:variable name="value" select="normalize-space(.)"/>
+    <xsl:template name="article-meta">
+        <xsl:param name="affiliations" tunnel="yes"/>
 
-            <dcterms:identifier><xsl:value-of select="concat($pub-id-type, ':', $value)"/></dcterms:identifier>
+        <xsl:for-each select="article-meta">
+            <xsl:for-each select="article-id">
+                <xsl:variable name="pub-id-type" select="@pub-id-type"/>
+                <xsl:variable name="value" select="normalize-space(.)"/>
 
-            <xsl:choose>
-                <xsl:when test="$pub-id-type = 'doi'">
-                    <bibo:doi><xsl:value-of select="$value"/></bibo:doi>
-                    <owl:sameAs rdf:resource="http://dx.doi.org/{$value}"/>
-                </xsl:when>
-                <xsl:when test="$pub-id-type = 'pmc'">
-                    <dcterms:source rdf:resource="http://www.ncbi.nlm.nih.gov/pmc/articles/{$value}"/>
-                    <owl:sameAs rdf:resource="http://biotea.idiginfo.org/pubmedOpenAccess/rdf/PMC{$value}"/>
-                    <owl:sameAs rdf:resource="http://www.ncbi.nlm.nih.gov/pmc/articles/{$value}"/>
-                    <dcterms:isFormatOf rdf:resource="http://www.ncbi.nlm.nih.gov/pmc/articles/{$value}"/>
-                </xsl:when>
-                <xsl:when test="$pub-id-type = 'pmid'">
-                    <bibo:pmid><xsl:value-of select="$value"/></bibo:pmid>
-                    <owl:sameAs rdf:resource="http://www.ncbi.nlm.nih.gov/pubmed/{$value}"/>
-                    <owl:sameAs rdf:resource="http://linkedlifedata.com/resource/pubmed/id/{$value}"/>
-                    <rdfs:seeAlso rdf:resource="http://identifiers.org/pubmed/{$value}"/>
-                    <rdfs:seeAlso rdf:resource="http://bio2rdf.org/pubmed:{$value}"/>
-                    <rdfs:seeAlso rdf:resource="http://europepmc.org/abstract/MED/{$value}"/>
-                    <rdfs:seeAlso rdf:resource="http://www.hubmed.org/display.cgi?uids={$value}"/>
-                </xsl:when>
-                <xsl:otherwise>
-                </xsl:otherwise>
-            </xsl:choose>
-        </xsl:for-each>
+                <dcterms:identifier><xsl:value-of select="concat($pub-id-type, ':', $value)"/></dcterms:identifier>
 
-        <xsl:apply-templates select="title-group/article-title | article-title"/>
-        <xsl:apply-templates select="abstract"/>
-        <xsl:apply-templates select="kwd-group/kwd"/>
+                <xsl:choose>
+                    <xsl:when test="$pub-id-type = 'doi'">
+                        <bibo:doi><xsl:value-of select="$value"/></bibo:doi>
+                        <owl:sameAs rdf:resource="http://dx.doi.org/{$value}"/>
+                    </xsl:when>
+                    <xsl:when test="$pub-id-type = 'pmc'">
+                        <dcterms:source rdf:resource="http://www.ncbi.nlm.nih.gov/pmc/articles/{$value}"/>
+                        <owl:sameAs rdf:resource="http://biotea.idiginfo.org/pubmedOpenAccess/rdf/PMC{$value}"/>
+                        <owl:sameAs rdf:resource="http://www.ncbi.nlm.nih.gov/pmc/articles/{$value}"/>
+                        <dcterms:isFormatOf rdf:resource="http://www.ncbi.nlm.nih.gov/pmc/articles/{$value}"/>
+                    </xsl:when>
+                    <xsl:when test="$pub-id-type = 'pmid'">
+                        <bibo:pmid><xsl:value-of select="$value"/></bibo:pmid>
+                        <owl:sameAs rdf:resource="http://www.ncbi.nlm.nih.gov/pubmed/{$value}"/>
+                        <owl:sameAs rdf:resource="http://linkedlifedata.com/resource/pubmed/id/{$value}"/>
+                        <rdfs:seeAlso rdf:resource="http://identifiers.org/pubmed/{$value}"/>
+                        <rdfs:seeAlso rdf:resource="http://bio2rdf.org/pubmed:{$value}"/>
+                        <rdfs:seeAlso rdf:resource="http://europepmc.org/abstract/MED/{$value}"/>
+                        <rdfs:seeAlso rdf:resource="http://www.hubmed.org/display.cgi?uids={$value}"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:for-each>
 
-        <xsl:apply-templates select="volume"/>
-        <xsl:apply-templates select="fpage"/>
-        <xsl:apply-templates select="lpage"/>
-        <xsl:apply-templates select="counts/page-count/@count"/>
-        <xsl:apply-templates select="permissions/license/@xlink:href"/>
+            <xsl:apply-templates select="title-group/article-title | article-title"/>
+            <xsl:apply-templates select="abstract"/>
+            <xsl:apply-templates select="kwd-group/kwd"/>
 
-        <xsl:variable name="affiliations">
-            <rdf:RDF>
-                <xsl:for-each select="//aff">
-                    <rdf:Description rdf:about="{concat($entityID, uuid:randomUUID())}">
-                        <rdf:type rdf:resource="{$foaf}Organization"/>
-                        <rdfs:value><xsl:value-of select="@id"/></rdfs:value>
+            <xsl:apply-templates select="volume"/>
+            <xsl:apply-templates select="fpage"/>
+            <xsl:apply-templates select="lpage"/>
+            <xsl:apply-templates select="counts/page-count/@count"/>
+            <xsl:apply-templates select="permissions/license/@xlink:href"/>
 
-                        <xsl:choose>
-                            <xsl:when test="institution or addr-line or country or fax or phone or email or uri">
-                                <xsl:apply-templates select="institution"/>
-                                <xsl:apply-templates select="email"/>
-                                <xsl:if test="uri">
-                                    <foaf:homepage rdf:resource="normalize-space(uri)"/>
-                                </xsl:if>
-
-                                <xsl:if test="addr-line or country or fax or phone">
-                                    <schema:address>
-                                        <rdf:Description rdf:about="{concat($entityID, uuid:randomUUID())}">
-                                            <rdf:type rdf:resource="{$schema}PostalAddress"/>
-
-                                            <xsl:apply-templates select="addr-line"/>
-                                            <xsl:apply-templates select="fax"/>
-                                            <xsl:apply-templates select="phone"/>
-                                        </rdf:Description>
-                                    </schema:address>
-                                </xsl:if>
-                            </xsl:when>
-
-                            <xsl:otherwise>
-                                <foaf:name><xsl:value-of select="."/></foaf:name>
-                            </xsl:otherwise>
-                        </xsl:choose>
-                    </rdf:Description>
-                </xsl:for-each>
-            </rdf:RDF>
-        </xsl:variable>
-
-        <xsl:for-each select="contrib-group/contrib">
-            <xsl:call-template name="contributor">
-                <xsl:with-param name="pub-id-type" select="'pmid'"/>
-                <xsl:with-param name="pub-id" select="key('pub-id-type', 'pmid')"/>
-                <xsl:with-param name="affiliations" select="$affiliations"/>
-            </xsl:call-template>
+            <xsl:for-each select="contrib-group/contrib">
+                <xsl:call-template name="contributor">
+                    <xsl:with-param name="pub-id-type" select="'pmid'"/>
+                    <xsl:with-param name="pub-id" select="key('pub-id-type', 'pmid')"/>
+    <!--                <xsl:with-param name="affiliations" select="$affiliations"/>-->
+                </xsl:call-template>
+            </xsl:for-each>
         </xsl:for-each>
     </xsl:template>
 
@@ -192,9 +199,11 @@
     <xsl:template name="contributor">
         <xsl:param name="pub-id-type"/>
         <xsl:param name="pub-id"/>
-        <xsl:param name="affiliations"/>
+        <xsl:param name="affiliations" tunnel="yes"/>
 
         <xsl:variable name="contributor" select="concat($entityID, uuid:randomUUID())"/>
+<!--        <xsl:variable name="corresp" select="@corresp"/>-->
+<!--        <xsl:variable name="corresp-rid" select="xref[@ref-type = 'corresp']/@rid"/>-->
 
         <dcterms:contributor>
             <rdf:Description rdf:about="{$contributor}">
@@ -215,14 +224,9 @@
                     <xsl:apply-templates select="email"/>
                 </xsl:for-each>
 
-                <xsl:for-each select="xref">
-<!--TODO: @ref-type = 'corresp'-->
-
+                <xsl:for-each select="xref[@ref-type='aff']">
                     <xsl:variable name="rid" select="@rid"/>
-
-                    <schema:affiliation>
-                        <xsl:copy-of select="$affiliations/rdf:RDF/rdf:Description[rdfs:value=$rid]"/>
-                    </schema:affiliation>
+                    <schema:affiliation rdf:resource="{$affiliations/rdf:RDF/rdf:Description[rdfs:value=$rid]/@rdf:about}"/>
                 </xsl:for-each>
             </rdf:Description>
         </dcterms:contributor>
