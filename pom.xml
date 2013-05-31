@@ -21,15 +21,12 @@
 		<relativePath>../stanbol/parent</relativePath>
 	</parent>
 
-	<groupId>eu.fusepool</groupId>
-	<artifactId>pubmed_semlift</artifactId>
+	<groupId>eu.fusepool.platform</groupId>
+	<artifactId>eu.fusepool.platform.enhancement.engines.pubmed</artifactId>
 	<version>0.1.0</version>
 	<packaging>bundle</packaging>
 
-	<name>Fusepool: PubMed semantic lifter</name>
-	<description>
-    Fusepool: PubMed semantic lifter
-  </description>
+	<name>Fusepool Enhancement Engine PubMed to RDF</name>
 
 	<developers>
 		<developer>
@@ -235,4 +232,5 @@
 			<url>https://repository.jboss.org/nexus/content/repositories/deprecated</url>
 		</repository>
 	</repositories>
+	<description>Transform XML document from journal articles collected by PubMed into RDF. The transformation is based on XSLT. The XML elements and attributes are mapped to terms from different ontologies.</description>
 </project>
