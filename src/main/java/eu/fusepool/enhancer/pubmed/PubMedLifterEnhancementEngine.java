@@ -1,27 +1,42 @@
 package eu.fusepool.enhancer.pubmed;
 
 
+import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.randomUUID;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.clerezza.rdf.core.MGraph;
+import org.apache.clerezza.rdf.core.NonLiteral;
+import org.apache.clerezza.rdf.core.Triple;
 import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
+import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
+import org.apache.clerezza.rdf.ontologies.FOAF;
+import org.apache.clerezza.rdf.ontologies.RDF;
+import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
+import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
+import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.ContentSink;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -64,7 +79,7 @@ implements EnhancementEngine, ServiceProperties {
 	
 	final Logger logger = LoggerFactory.getLogger(this.getClass()) ;
 
-	
+	private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
 	
 	/**
 	 * The literal factory
@@ -126,47 +141,24 @@ implements EnhancementEngine, ServiceProperties {
 
 	@Override
 	public void computeEnhancements(ContentItem ci) throws EngineException {
+
 		UriRef contentItemId = ci.getUri();
 		logger.info("UriRef: "+contentItemId.getUnicodeString()) ;
-
-		
-
-		
-
-		//TODO: check if mimetype is supported
-//		String mimeType = ci.getMimeType() ;
-//		if(!isSupported(mimeType)) {
-//			throw new EngineException("Cannot enhance mimetype: "+mimeType) ;
-//		}
-		
-		// Load rdf graph 
-		MGraph rdfGraph = new IndexedMGraph();
-		
+				
 		try {
-//			File fTrans = componentContext.getBundleContext().getDataFile("dump.xml") ;
-//			FileOutputStream file = new FileOutputStream(fTrans) ;
-//			IOUtils.copy(ci.getStream(), file) ;	
 			ci.getLock().writeLock().lock();
-			XMLProcessor processor = new PubMedXMLProcessor() ;
-			InputStream rdfIs = null ;
-			try {
-				rdfIs = processor.processXML(ci.getStream()) ;
-//				fTrans = componentContext.getBundleContext().getDataFile("transformed.xml") ;
-//				FileOutputStream file2 = new FileOutputStream(fTrans) ;
-//				IOUtils.copy(rdfIs, file2) ;
-				parser.parse(rdfGraph, rdfIs, SupportedFormat.RDF_XML) ;
-//				file.close() ;
-				
-				
-				rdfIs.close() ;
-			} catch (Exception e) {
-				logger.error("Wrong data format for the "+this.getName()+" enhancer", e) ;
-				return ;
-			}
-		
-		  
-	
-		ci.getMetadata().addAll(rdfGraph) ;
+
+			// Add a part to the content item as a text/plain representation of the XML document 
+			addPartToContentItem(ci);
+			// Transform the patent XML file into RDF
+			MGraph mapping = transformXML(ci);
+			
+			// Create annotations to each entity extracted from the XML
+			MGraph annotations = addEnhancements(ci, mapping);
+			
+			// Add all the RDF triples to the content item metadata
+			ci.getMetadata().addAll(annotations);
+			ci.getMetadata().addAll(mapping);
 		
 			
 		} catch (Exception e) {
@@ -177,6 +169,83 @@ implements EnhancementEngine, ServiceProperties {
 		}
 	}
 
+	/*
+	 *  Add a part to the content item as a text/plain representation of the XML document
+	 */
+	private void addPartToContentItem(ContentItem ci) throws EngineException, IOException {
+		
+		InputStream toCopy = ci.getStream() ;
+		UriRef blobUri = new UriRef("urn:pubmed-engine:plain-text:" + randomUUID());
+		ContentSink plainTextSink = ciFactory.createContentSink("text/plain");
+		OutputStream os = plainTextSink.getOutputStream() ;
+		IOUtils.copy(toCopy, os) ;
+		IOUtils.closeQuietly(toCopy) ;
+		IOUtils.closeQuietly(os) ;
+		ci.addPart(blobUri, plainTextSink.getBlob());
+	}
+	
+	/*
+	 * Transform patent XML documents into RDF using an XSLT transformation and add the graph to the content item metadata.
+	 */
+	private MGraph transformXML(ContentItem ci) throws EngineException {
+		
+		MGraph mapping = null;
+		
+		XMLProcessor processor = new PubMedXMLProcessor() ;
+		InputStream rdfIs = null ; 
+	
+		logger.debug("Starting transformation from XML to RDF");
+		
+		try {
+			
+			mapping = new IndexedMGraph();
+			rdfIs = processor.processXML(ci.getStream()) ;
+			parser.parse(mapping, rdfIs, SupportedFormat.RDF_XML) ;
+			rdfIs.close() ;
+			//ci.getMetadata().addAll(metadata) ;
+			
+		} catch (Exception e) {
+			logger.error("Wrong data format for the " + this.getName() + " enhancer.", e) ;			
+		}
+		
+		logger.debug("Finished transformation from XML to RDF");
+		
+		return mapping;
+	}
+	
+	
+	/*
+	 * Create an entity annotation for each entity found by the transformation of the XML document. 
+	 * Each annotation is referred to its entity.
+	 */
+	private MGraph addEnhancements(ContentItem ci, MGraph mapping) {
+		
+		MGraph annotations = new IndexedMGraph();
+		
+		if (! mapping.isEmpty()) {
+			
+			Iterator<Triple> ipersons = mapping.filter(null, RDF.type, FOAF.Person) ;
+			
+			while (ipersons.hasNext()) {
+				// create an entity annotation
+				UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this) ;
+				
+				Triple person = ipersons.next();
+				NonLiteral subPerson = person.getSubject(); 
+				
+				// add a triple to link the enhancement to the entity
+				Triple entityReference = new TripleImpl(entityAnnotation, OntologiesTerms.fiseEntityReference, subPerson);
+				annotations.add( entityReference);
+				
+				// add a confidence value
+				Triple confidence = new TripleImpl(entityAnnotation, OntologiesTerms.fiseConfidence, new PlainLiteralImpl("1.0"));
+				annotations.add(confidence);			
+			}
+		}
+		
+		return annotations;		
+	}	
+	
 	@Override
 	public Map<String, Object> getServiceProperties() {
 		return Collections.unmodifiableMap(Collections.singletonMap(
