@@ -106,7 +106,7 @@
 
         <xsl:variable name="issuePath">
             <xsl:if test="$issue != ''">
-                <xsl:value-of select="concat($uriThingSeparator, $issue)"/>
+                <xsl:value-of select="replace(concat($uriThingSeparator, $issue), ' ', '-')"/>
             </xsl:if>
         </xsl:variable>
 
