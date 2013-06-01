@@ -3,6 +3,7 @@ package eu.fusepool.platform.enhancer.engine.pubmed;
 
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.randomUUID;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,6 +21,8 @@ import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
+import org.apache.clerezza.rdf.ontologies.DC;
+import org.apache.clerezza.rdf.ontologies.DCTERMS;
 import org.apache.clerezza.rdf.ontologies.FOAF;
 import org.apache.clerezza.rdf.ontologies.RDF;
 import org.apache.commons.io.IOUtils;
@@ -30,15 +33,20 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
+import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
 import org.apache.stanbol.enhancer.servicesapi.ContentSink;
+import org.apache.stanbol.enhancer.servicesapi.ContentSource;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
+import org.apache.stanbol.enhancer.servicesapi.impl.ByteArraySource;
+import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
@@ -197,29 +205,36 @@ implements EnhancementEngine, ServiceProperties {
 	}
 
 	/*
-	 *  Add a part to the content item as a text/plain representation of the XML document
+	 *  Add a part to the content item as a text/plain representation of the XML document to be
+	 *  used by the ECS for indexing.
 	 */
-	public void addPartToContentItem(ContentItem ci) throws EngineException, IOException {
+	public void addPartToContentItem(ContentItem ci) {
 		
-		//System.out.println("Start adding plain text representation");
+		logger.debug("Start adding plain text representation");
 		
 		try {
-		
-			InputStream toCopy = ci.getStream() ;
 			
-			UriRef partUri = new UriRef("urn:fusepool-patent-engine:plain-text:" + randomUUID());
-			ContentSink plainTextSink = ciFactory.createContentSink("text/plain");
+			UriRef partUri = new UriRef("urn:fusepool-pubmed-engine:part-01:" + randomUUID()); // part uri with index 1 (part with index 0 is reserved to the input data)
+			// Add the same content of the document as text/plain. This part can contain some
+			// text extracted from the full content for indexing as title and abstract 
+			byte [] content = IOUtils.toByteArray(ci.getBlob().getStream());
 			
-			ci.addPart(partUri, plainTextSink.getBlob());
-		
+			// Add some content to the new part as plain text 
+			ContentSource source = new ByteArraySource(content, "text/plain");
+			ci.addPart(ci.getUri(), source);
+			
+			// Add metadata about the new part of the content item
+			ci.getMetadata().add(new TripleImpl(ci.getUri(), DCTERMS.hasPart, partUri));
+			
 		}
 		catch (IOException e) {
+			
 			logger.error("Error adding text/plain part", e) ;
-			//e.printStackTrace();
+			
 		}
 		
 		
-		//System.out.println("Finished adding plain text representation");
+		logger.debug("Finished adding plain text representation");
 	}
 	
 	/*
@@ -240,7 +255,7 @@ implements EnhancementEngine, ServiceProperties {
 			rdfIs = processor.processXML(ci.getStream()) ;
 			parser.parse(xml2rdf, rdfIs, SupportedFormat.RDF_XML) ;
 			rdfIs.close() ;
-			//ci.getMetadata().addAll(metadata) ;
+			
 			
 		} catch (Exception e) {
 			logger.error("Wrong data format for the " + this.getName() + " enhancer.", e) ;			
@@ -255,13 +270,14 @@ implements EnhancementEngine, ServiceProperties {
 	 * Create an entity annotation for each entity found by the transformation of the XML document. 
 	 * Each annotation is referred to its entity.
 	 */
-	public MGraph addEnhancements(ContentItem ci, MGraph mapping) {
+	public MGraph addEnhancements(ContentItem ci, MGraph xml2rdf) {
 		
-		MGraph annotations = new IndexedMGraph();
+		MGraph enhancements = new IndexedMGraph();
 		
-		if (! mapping.isEmpty()) {
+		if (! xml2rdf.isEmpty()) {
 			
-			Iterator<Triple> ipersons = mapping.filter(null, RDF.type, FOAF.Person) ;
+			Iterator<Triple> ipersons = xml2rdf.filter(null, RDF.type, FOAF.Person) ;
+			
 			
 			while (ipersons.hasNext()) {
 				// create an entity annotation
@@ -271,16 +287,16 @@ implements EnhancementEngine, ServiceProperties {
 				NonLiteral subPerson = person.getSubject(); 
 				
 				// add a triple to link the enhancement to the entity
-				Triple entityReference = new TripleImpl(entityAnnotation, OntologiesTerms.fiseEntityReference, subPerson);
-				annotations.add( entityReference);
+				Triple entityReference = new TripleImpl(entityAnnotation, TechnicalClasses.ENHANCER_ENHANCEMENT, subPerson);
+				enhancements.add( entityReference);
 				
 				// add a confidence value
-				Triple confidence = new TripleImpl(entityAnnotation, OntologiesTerms.fiseConfidence, new PlainLiteralImpl("1.0"));
-				annotations.add(confidence);			
+				Triple confidence = new TripleImpl(entityAnnotation, TechnicalClasses.FNHANCER_CONFIDENCE_LEVEL, new PlainLiteralImpl("1.0"));
+				enhancements.add(confidence);			
 			}
 		}
 		
-		return annotations;		
+		return enhancements;		
 	}	
 	
 	@Override
