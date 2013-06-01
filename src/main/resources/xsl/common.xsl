@@ -32,7 +32,12 @@
     <xsl:variable name="property" select="concat($baseURI, 'property', $uriThingSeparator)"/>
     <xsl:variable name="dataset" select="concat($baseURI, 'dataset/')"/>
     <xsl:variable name="pubmed" select="concat($baseURI, 'pubmed/')"/>
-    <xsl:variable name="conceptPubMed" select="concat($concept, 'pubmed')"/>
+    <xsl:variable name="journal" select="concat($baseURI, 'journal/')"/>
+    <xsl:variable name="ncbipmc" select="'http://www.ncbi.nlm.nih.gov/pmc/articles/'"/>
+    <xsl:variable name="doi" select="'http://dx.doi.org/'"/>
+
+    <xsl:variable name="conceptSchemePubMed" select="concat($concept, 'pubmed')"/>
+    <xsl:variable name="entityID" select="concat($baseURI, 'id', $uriThingSeparator)"/>
     <xsl:variable name="provDocument" select="document($pathToProvDocument)/rdf:RDF"/>
 <!-- CONFIG END -->
 
@@ -127,7 +132,7 @@
         <xsl:param name="date"/>
 
         <xsl:analyze-string select="$date" regex="([0-9]{{4}})([0-9]{{2}})([0-9]{{2}})">
-            <xsl:matching-substring>                
+            <xsl:matching-substring>
                 <xsl:call-template name="rdfDatatypeXSD">
                     <xsl:with-param name="type" select="'date'"/>
                 </xsl:call-template>
@@ -140,4 +145,23 @@
             </xsl:non-matching-substring>
         </xsl:analyze-string>
     </xsl:template>
+
+
+    <xsl:function name="fn:getPubURIBase">
+        <xsl:param name="pub-id-type"/>
+
+        <xsl:choose>
+            <xsl:when test="$pub-id-type = 'doi'">
+                <xsl:value-of select="$doi"/>
+            </xsl:when>
+            <xsl:when test="$pub-id-type = 'pmc'">
+                <xsl:value-of select="$ncbipmc"/>
+            </xsl:when>
+            <xsl:when test="$pub-id-type = 'pmid'">
+                <xsl:value-of select="$pubmed"/>
+            </xsl:when>
+            <xsl:otherwise>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
 </xsl:stylesheet>
