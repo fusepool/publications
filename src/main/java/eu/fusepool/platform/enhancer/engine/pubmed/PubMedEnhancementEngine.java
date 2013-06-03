@@ -182,9 +182,6 @@ implements EnhancementEngine, ServiceProperties {
 			
 			// Transform the patent XML file into RDF
 			MGraph xml2rdf = transformXML(ci);
-						
-			// Add a part to the content item as a text/plain representation of the XML document 
-			addPartToContentItem(ci);
 			
 			// Create enhancements to each entity extracted from the XML
 			MGraph enhancements = addEnhancements(ci, xml2rdf);
@@ -193,9 +190,12 @@ implements EnhancementEngine, ServiceProperties {
 			ci.getMetadata().addAll(xml2rdf);
 			ci.getMetadata().addAll(enhancements);
 			
+			// Add a part to the content item as a text/plain representation of the XML document for indexing. 
+			addPartToContentItem(ci);
+			
 			
 		} catch (Exception e) {
-			logger.error( "", e) ;			
+			logger.error( "Error while computing the enhancements.", e) ;			
 		}
 		/*
 		finally {
@@ -206,7 +206,8 @@ implements EnhancementEngine, ServiceProperties {
 
 	/*
 	 *  Add a part to the content item as a text/plain representation of the XML document to be
-	 *  used by the ECS for indexing.
+	 *  used by the ECS for indexing. The part text is constructed from triples properties values so 
+	 *  this method must be called after the xml to rdf transformation.
 	 */
 	public void addPartToContentItem(ContentItem ci) {
 		
@@ -217,7 +218,13 @@ implements EnhancementEngine, ServiceProperties {
 			UriRef partUri = new UriRef("urn:fusepool-pubmed-engine:part-01:" + randomUUID()); // part uri with index 1 (part with index 0 is reserved to the input data)
 			// Add the same content of the document as text/plain. This part can contain some
 			// text extracted from the full content for indexing as title and abstract 
-			byte [] content = IOUtils.toByteArray(ci.getBlob().getStream());
+			
+			// full document
+			//byte [] content = IOUtils.toByteArray(ci.getBlob().getStream());
+			
+			// construct the text for the part from triples properties values
+			@SuppressWarnings("deprecation")
+			byte [] content = IOUtils.toByteArray(constructText(ci.getMetadata()));
 			
 			// Add some content to the new part as plain text 
 			ContentSource source = new ByteArraySource(content, "text/plain");
@@ -286,8 +293,8 @@ implements EnhancementEngine, ServiceProperties {
 				Triple person = ipersons.next();
 				NonLiteral subPerson = person.getSubject(); 
 				
-				// add a triple to link the enhancement to the entity
-				Triple entityReference = new TripleImpl(entityAnnotation, TechnicalClasses.ENHANCER_ENHANCEMENT, subPerson);
+				// add a triple to link the enhancement to the entity referenced
+				Triple entityReference = new TripleImpl(entityAnnotation, OntologiesTerms.fiseEntityReference, subPerson);
 				enhancements.add( entityReference);
 				
 				// add a confidence value
@@ -298,6 +305,50 @@ implements EnhancementEngine, ServiceProperties {
 		
 		return enhancements;		
 	}	
+	
+	/*
+	 * Creates a string filled with values from properties:
+	 * foaf:name of inventors and applicants
+	 * dcterms:title of the publication
+	 * dcterms:abstract of the publication
+	 * The text is used for indexing. The graph passed as argument must contain the RDF triples created after the transformation.
+	 * 
+	 */
+	public String constructText(MGraph graph) {
+		
+		String text = "";
+		
+		UriRef documentUri = null;
+		
+		// Get the titles. There might be three titles for en, fr, de.
+		Iterator<Triple> ititles = graph.filter(documentUri, DCTERMS.title, null);
+		String title = "";
+		while(ititles.hasNext()) {
+			title = ititles.next().getObject().toString() + " ";
+			text += title;
+		}
+		
+		
+		// Get the abstracts. There might be three abstracts for en, fr, de.
+		Iterator<Triple> iabstracts = graph.filter(documentUri, DCTERMS.abstract_, null);
+		String abstract_ = " ";
+		while(iabstracts.hasNext()) {
+			title = iabstracts.next().getObject().toString() + " ";
+			text += abstract_;
+		}
+		
+		// Get all the foaf:name of entities of type foaf:Person.
+		Iterator<Triple> inames = graph.filter(null, FOAF.name, null);
+		String name = "";
+		while(inames.hasNext()) {
+			title = inames.next().getObject().toString() + " ";
+			text += name;
+		}
+		
+		logger.info("Text to be indexed" + text);
+		
+		return text;
+	}
 	
 	@Override
 	public Map<String, Object> getServiceProperties() {
