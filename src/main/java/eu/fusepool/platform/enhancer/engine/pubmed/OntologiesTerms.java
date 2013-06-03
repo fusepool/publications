@@ -8,6 +8,8 @@ import org.apache.clerezza.rdf.core.UriRef;
  */
 public class OntologiesTerms {
 	
-	// add uriref of term from ontologies 
+	// FISE
+	final static String FISE_NS = "http://fise.iks-project.eu/ontology/";
+	final static UriRef fiseEntityReference = new UriRef(FISE_NS + "entity-reference");
 
 }
