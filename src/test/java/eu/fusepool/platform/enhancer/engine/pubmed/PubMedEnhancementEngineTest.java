@@ -101,7 +101,7 @@ public class PubMedEnhancementEngineTest {
 	/*
 	 * Test if subjects of type person are found after the transformation and prints them
 	 */
-	/*
+	
 	@Test
 	public void testTransformXML() {
 		
@@ -133,6 +133,8 @@ public class PubMedEnhancementEngineTest {
 				
 			}
 			
+			System.out.println("Total number of entity of type foaf:Person: " + personsNumber);
+			
 			
 		}
 		else {
@@ -142,12 +144,12 @@ public class PubMedEnhancementEngineTest {
 		//assertTrue("Subjects of type foaf:Person found in the document " + personsNumber, personsNumber == PERSONS_NUMBER);
 		
 	}
-	*/
+	
 	
 	/*
 	 * Test if entity-reference annotations have been added for each entity found after the transformation of the input XML file into RDF.
 	 */
-	/*
+	
 	@Test
 	public void testAddEnhancements() {
 		
@@ -164,12 +166,13 @@ public class PubMedEnhancementEngineTest {
 		
 		MGraph graph = engine.addEnhancements(ci, xml2rdf);
 		
-		int entityReferences = 0;
+		
 		
 		if (! graph.isEmpty()) {
 			
+			int entityReferences = 0;
 			// Filter triples for entities annotations
-			Iterator<Triple> ireferences = graph.filter(null, TechnicalClasses.ENHANCER_ENHANCEMENT, null);
+			Iterator<Triple> ireferences = graph.filter(null, OntologiesTerms.fiseEntityReference, null);
 			while (ireferences.hasNext()) {
 				entityReferences += 1;
 				Triple triple = ireferences.next();
@@ -178,6 +181,7 @@ public class PubMedEnhancementEngineTest {
 				System.out.println("Entity references " + entityReferences + ") "  + enhancement + " entity reference: " + entity);
 			}
 			
+			System.out.println("Total number of entity references: " + entityReferences);
 		}
 		else {
 			System.out.println("Enhancement graph empty !");
@@ -187,7 +191,7 @@ public class PubMedEnhancementEngineTest {
 	
 	
 	}
-	*/
+	
 	
 	/*
 	 * Test whether a plain text representation part of document has been added to the content item. 
@@ -223,6 +227,26 @@ public class PubMedEnhancementEngineTest {
 		
 		assertTrue("text/plain".equals(partMimeType));
 		
+		
+	}
+	
+	@Test
+	public void testConstructText() {
+		
+		MGraph xml2rdf = null;
+		
+		try {
+			
+			xml2rdf = engine.transformXML(ci);
+			
+		} catch (EngineException e) {
+			 
+			System.out.println("Error while transforming the XML file into RDF");
+		}
+		
+		String text = engine.constructText(xml2rdf);
+		
+		System.out.println("TEXT FOR INDEXING: " + text);
 		
 	}
 
