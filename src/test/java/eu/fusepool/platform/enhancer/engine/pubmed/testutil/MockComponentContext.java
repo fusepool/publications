@@ -79,13 +79,15 @@ public class MockComponentContext implements ComponentContext {
             public void removeBundleListener(BundleListener listener) {
             }
 
-            @Override
+            @SuppressWarnings("rawtypes")
+			@Override
             public ServiceRegistration registerService(String clazz,
                     Object service, Dictionary properties) {
                 return null;
             }
 
-            @Override
+            @SuppressWarnings("rawtypes")
+			@Override
             public ServiceRegistration registerService(String[] clazzes,
                     Object service, Dictionary properties) {
                 return null;

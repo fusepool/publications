@@ -3,8 +3,6 @@
  */
 package eu.fusepool.platform.enhancer.engine.pubmed.xslt;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -25,22 +23,12 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import eu.fusepool.platform.enhancer.engine.pubmed.testutil.MockComponentContext;
-import eu.fusepool.platform.enhancer.engine.pubmed.xslt.CatalogBuilder;
-import eu.fusepool.platform.enhancer.engine.pubmed.xslt.XMLProcessor;
 import eu.fusepool.platform.enhancer.engine.pubmed.xslt.impl.PubMedXMLProcessor;
 
 
@@ -54,15 +42,15 @@ public class XSLTProcessorTest {
 
 	static final String testDataFolderName ="."+File.separator+"bundle-testdata/" ;
 
-	private final String sparqlQuery =	"PREFIX pmo: <http://www.patexpert.org/ontologies/pmo.owl#>\n"+
-											"PREFIX dcterms: <http://purl.org/dc/terms/>\n"+
-											"PREFIX sumo: <http://www.owl-ontologies.com/sumo.owl#>\n"+
-											"PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n"+
-											"SELECT ?inventor\n"+ 
-											"WHERE { \n"+
-											 	"?invention pmo:inventor ?inventor_uri .\n"+
-											 	"?inventor_uri foaf:name ?inventor .\n"+
-											 "}" ;	
+//	private final String sparqlQuery =	"PREFIX pmo: <http://www.patexpert.org/ontologies/pmo.owl#>\n"+
+//											"PREFIX dcterms: <http://purl.org/dc/terms/>\n"+
+//											"PREFIX sumo: <http://www.owl-ontologies.com/sumo.owl#>\n"+
+//											"PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n"+
+//											"SELECT ?inventor\n"+ 
+//											"WHERE { \n"+
+//											 	"?invention pmo:inventor ?inventor_uri .\n"+
+//											 	"?inventor_uri foaf:name ?inventor .\n"+
+//											 "}" ;	
 									
 	
 

@@ -3,10 +3,8 @@ package eu.fusepool.platform.enhancer.engine.pubmed;
 
 import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper.randomUUID;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -21,7 +19,6 @@ import org.apache.clerezza.rdf.core.impl.PlainLiteralImpl;
 import org.apache.clerezza.rdf.core.impl.TripleImpl;
 import org.apache.clerezza.rdf.core.serializedform.Parser;
 import org.apache.clerezza.rdf.core.serializedform.SupportedFormat;
-import org.apache.clerezza.rdf.ontologies.DC;
 import org.apache.clerezza.rdf.ontologies.DCTERMS;
 import org.apache.clerezza.rdf.ontologies.FOAF;
 import org.apache.clerezza.rdf.ontologies.RDF;
@@ -32,17 +29,12 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
-import org.apache.stanbol.enhancer.contentitem.inmemory.InMemoryContentItemFactory;
-import org.apache.stanbol.enhancer.servicesapi.Blob;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.enhancer.servicesapi.ContentItemFactory;
-import org.apache.stanbol.enhancer.servicesapi.ContentSink;
 import org.apache.stanbol.enhancer.servicesapi.ContentSource;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.InvalidContentException;
 import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
-import org.apache.stanbol.enhancer.servicesapi.helper.ContentItemHelper;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.impl.ByteArraySource;
@@ -89,7 +81,7 @@ implements EnhancementEngine, ServiceProperties {
 	
 	final Logger logger = LoggerFactory.getLogger(this.getClass()) ;
 
-	private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
+//	private static final ContentItemFactory ciFactory = InMemoryContentItemFactory.getInstance();
 	
 	/**
 	 * The literal factory
@@ -153,7 +145,7 @@ implements EnhancementEngine, ServiceProperties {
             }
             
             // MIME Type of the input patent document must be application/xml
-            if (! ci.getMimeType().equals(this.MIME_TYPE_XML)) {
+            if (! ci.getMimeType().equals(MIME_TYPE_XML)) {
             	return CANNOT_ENHANCE;
             }
             
