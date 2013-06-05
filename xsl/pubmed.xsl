@@ -335,7 +335,7 @@
         <foaf:honorificSuffix><xsl:value-of select="."/></foaf:honorificSuffix>
     </xsl:template>
     <xsl:template match="phone">
-        <foaf:phone rdf:resource="tel:{normalize-space(.)}"/>
+        <foaf:phone rdf:resource="tel:{replace(normalize-space(.), ' ', '-')}"/>
     </xsl:template>
     <xsl:template match="fax">
         <schema:faxNumber><xsl:value-of select="normalize-space(.)"/></schema:faxNumber>
