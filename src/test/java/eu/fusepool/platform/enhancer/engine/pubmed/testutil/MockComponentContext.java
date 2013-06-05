@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.fusepool.enhancer.pubmed.testutil;
+package eu.fusepool.platform.enhancer.engine.pubmed.testutil;
 
 import java.io.File;
 import java.io.InputStream;
@@ -79,13 +79,15 @@ public class MockComponentContext implements ComponentContext {
             public void removeBundleListener(BundleListener listener) {
             }
 
-            @Override
+            @SuppressWarnings("rawtypes")
+			@Override
             public ServiceRegistration registerService(String clazz,
                     Object service, Dictionary properties) {
                 return null;
             }
 
-            @Override
+            @SuppressWarnings("rawtypes")
+			@Override
             public ServiceRegistration registerService(String[] clazzes,
                     Object service, Dictionary properties) {
                 return null;

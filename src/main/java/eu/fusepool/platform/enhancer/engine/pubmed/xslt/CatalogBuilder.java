@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.fusepool.enhancer.pubmed.xslt;
+package eu.fusepool.platform.enhancer.engine.pubmed.xslt;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -116,45 +116,7 @@ public class CatalogBuilder {
 		os.close() ;
 	}
 
-//	private void populateDTD(String zipRes) throws Exception {
-//
-//		InputStream is = getClass().getResourceAsStream(zipRes) ;
-//		ZipInputStream zis = new ZipInputStream(is) ;
-//
-//		ZipEntry entry;
-//		// two steps !?!?
-//		while((entry=zis.getNextEntry())!=null) {
-//			String name = entry.getName() ;
-//			String newFile = BASE_DTD+name ;
-//			if(entry.isDirectory()) {
-//				makeBaseDirs(newFile) ;
-//			} else {
-//				File entryFile = bundleContext.getDataFile(newFile) ;
-//				File parent = entryFile.getParentFile() ;
-//				if(!parent.exists() && !parent.mkdirs()){
-//					throw new IllegalStateException("Couldn't create dir: " + parent);
-//				}
-//
-//				FileOutputStream os = new FileOutputStream(entryFile) ;
-//				Writer writer = new OutputStreamWriter(os, Charset.forName("UTF-8"));
-//				//InputStream inputs=zf.getInputStream(zipEntry);
-//				while(zis.available()>0) {
-//					//writer.write(cbuf)
-//					os.write(zis.read()) ;
-//				}
-//				os.close() ;
-//			}
-//		}
-//		zis.close() ;
-//
-//	}
 
-
-	private void makeBaseDirs(String base) {
-		File baseDir = bundleContext.getDataFile(base) ;
-		if(!baseDir.exists())
-			baseDir.mkdirs() ;
-	}
 
 	private void makeBaseDir(String base) {
 		File baseDir = bundleContext.getDataFile(base) ;

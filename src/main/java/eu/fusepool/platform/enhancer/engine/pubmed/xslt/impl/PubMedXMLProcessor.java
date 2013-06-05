@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.fusepool.enhancer.pubmed.xslt.impl;
+package eu.fusepool.platform.enhancer.engine.pubmed.xslt.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -17,9 +17,9 @@ import javax.xml.transform.stream.StreamSource;
 import org.apache.xml.resolver.tools.ResolvingXMLFilter;
 import org.xml.sax.InputSource;
 
-import eu.fusepool.enhancer.pubmed.xslt.PubMedXMLReader;
-import eu.fusepool.enhancer.pubmed.xslt.ResourceURIResolver;
-import eu.fusepool.enhancer.pubmed.xslt.XMLProcessor;
+import eu.fusepool.platform.enhancer.engine.pubmed.xslt.PubMedXMLReader;
+import eu.fusepool.platform.enhancer.engine.pubmed.xslt.ResourceURIResolver;
+import eu.fusepool.platform.enhancer.engine.pubmed.xslt.XMLProcessor;
 
 
 /**

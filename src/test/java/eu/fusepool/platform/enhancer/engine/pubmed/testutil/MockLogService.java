@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.fusepool.enhancer.pubmed.testutil;
+package eu.fusepool.platform.enhancer.engine.pubmed.testutil;
 
 import org.apache.log4j.Logger;
 import org.osgi.framework.ServiceReference;

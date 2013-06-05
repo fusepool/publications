@@ -1,4 +1,4 @@
-package eu.fusepool.enhancer.pubmed.xslt;
+package eu.fusepool.platform.enhancer.engine.pubmed.xslt;
 
 import java.io.InputStream;
 
