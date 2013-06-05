@@ -245,7 +245,7 @@
                         <xsl:value-of select="concat($pubmed, $pmid-cites)"/>
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:value-of select="concat($entityID, uuid:randomUUID())"/>
+                        <xsl:value-of select="concat($doc, uuid:randomUUID())"/>
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:variable>

@@ -30,9 +30,9 @@
     <xsl:variable name="code" select="concat($baseURI, 'code/')"/>
     <xsl:variable name="class" select="concat($baseURI, 'class', $uriThingSeparator)"/>
     <xsl:variable name="property" select="concat($baseURI, 'property', $uriThingSeparator)"/>
-    <xsl:variable name="dataset" select="concat($baseURI, 'dataset/')"/>
-    <xsl:variable name="pubmed" select="concat($baseURI, 'pubmed/')"/>
-    <xsl:variable name="journal" select="concat($baseURI, 'journal/')"/>
+    <xsl:variable name="doc" select="concat($baseURI, 'doc/')"/>
+    <xsl:variable name="pubmed" select="concat($doc, 'pubmed/')"/>
+    <xsl:variable name="journal" select="concat($doc, 'journal/')"/>
     <xsl:variable name="ncbipmc" select="'http://www.ncbi.nlm.nih.gov/pmc/articles/'"/>
     <xsl:variable name="doi" select="'http://dx.doi.org/'"/>
 
