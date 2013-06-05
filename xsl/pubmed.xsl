@@ -212,6 +212,10 @@
                 <foaf:publications rdf:resource="{concat(fn:getPubURIBase($pub-id-type), $pub-id)}"/>
 
                 <xsl:for-each select="name">
+                    <xsl:if test="given-names and surname">
+                        <rdfs:label><xsl:value-of select="concat(given-names, ' ', surname)"/></rdfs:label>
+                    </xsl:if>
+
                     <xsl:apply-templates select="given-names"/>
                     <xsl:apply-templates select="surname"/>
                     <xsl:apply-templates select="prefix"/>
