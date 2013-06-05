@@ -256,21 +256,21 @@
                         <rdf:type rdf:resource="{$bibo}Document"/>
                         <bibo:citedBy rdf:resource="{concat($pubmed, $pmid)}"/>
 
-                        <xsl:for-each select="person-group/name">
-                            <dcterms:contributor>
-                                <xsl:variable name="contributor" select="concat($entityID, uuid:randomUUID())"/>
-                                <rdf:Description rdf:about="{$contributor}">
-                                    <rdf:type rdf:resource="{$foaf}Person"/>
+<!--                        <xsl:for-each select="person-group/name">-->
+<!--                            <dcterms:contributor>-->
+<!--                                <xsl:variable name="contributor" select="concat($entityID, uuid:randomUUID())"/>-->
+<!--                                <rdf:Description rdf:about="{$contributor}">-->
+<!--                                    <rdf:type rdf:resource="{$foaf}Person"/>-->
 
-                                    <foaf:publications rdf:resource="{$pmid-cites}"/>
+<!--                                    <foaf:publications rdf:resource="{$pmid-cites}"/>-->
 
-                                    <xsl:apply-templates select="given-names"/>
-                                    <xsl:apply-templates select="surname"/>
-                                    <xsl:apply-templates select="prefix"/>
-                                    <xsl:apply-templates select="suffix"/>
-                                </rdf:Description>
-                            </dcterms:contributor>
-                        </xsl:for-each>
+<!--                                    <xsl:apply-templates select="given-names"/>-->
+<!--                                    <xsl:apply-templates select="surname"/>-->
+<!--                                    <xsl:apply-templates select="prefix"/>-->
+<!--                                    <xsl:apply-templates select="suffix"/>-->
+<!--                                </rdf:Description>-->
+<!--                            </dcterms:contributor>-->
+<!--                        </xsl:for-each>-->
                     </rdf:Description>
                 </bibo:cites>
             </rdf:Description>
