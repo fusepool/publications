@@ -2,8 +2,8 @@
 
 namespace="http://fusepool.info/";
 repoMeta="/home/fusepool/patents-reengineering/data/meta/";
-pubmed="/data-new/pubmed/";
-xslPubMed="/var/www/publications/xsl/pubmed.xsl";
+pubmed="/data-new/pmc/";
+xslPubMed="../xsl/pubmed.xsl";
 tdbAssembler="/usr/lib/fuseki/tdb.pubmed.ttl";
 JVM_ARGS="-Xmx32000M";
 db="/data/tdb/fusepool/";
