@@ -25,7 +25,7 @@
     <xsl:variable name="lang" select="'en'"/>
     <xsl:variable name="uriThingSeparator" select="'/'"/>
 
-    <xsl:variable name="provenance" select="concat($baseURI, 'provenance', $uriThingSeparator)"/>
+    <xsl:variable name="provenance" select="concat($baseURI, 'prov', $uriThingSeparator)"/>
     <xsl:variable name="concept" select="concat($baseURI, 'concept/')"/>
     <xsl:variable name="code" select="concat($baseURI, 'code/')"/>
     <xsl:variable name="class" select="concat($baseURI, 'class', $uriThingSeparator)"/>
