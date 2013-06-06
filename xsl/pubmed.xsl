@@ -80,6 +80,7 @@
 
                             <xsl:otherwise>
                                 <foaf:name><xsl:value-of select="."/></foaf:name>
+                                <rdfs:label><xsl:value-of select="."/></rdfs:label>
                             </xsl:otherwise>
                         </xsl:choose>
                     </rdf:Description>
@@ -325,6 +326,7 @@
 
     <xsl:template match="institution">
         <foaf:name><xsl:value-of select="."/></foaf:name>
+        <rdfs:label><xsl:value-of select="."/></rdfs:label>
     </xsl:template>
     <xsl:template match="given-names">
         <foaf:firstName><xsl:value-of select="."/></foaf:firstName>
