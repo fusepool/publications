@@ -80,6 +80,7 @@
 
                             <xsl:otherwise>
                                 <foaf:name><xsl:value-of select="."/></foaf:name>
+                                <rdfs:label><xsl:value-of select="."/></rdfs:label>
                             </xsl:otherwise>
                         </xsl:choose>
                     </rdf:Description>
@@ -212,6 +213,10 @@
                 <foaf:publications rdf:resource="{concat(fn:getPubURIBase($pub-id-type), $pub-id)}"/>
 
                 <xsl:for-each select="name">
+                    <xsl:if test="given-names and surname">
+                        <rdfs:label><xsl:value-of select="concat(given-names, ' ', surname)"/></rdfs:label>
+                    </xsl:if>
+
                     <xsl:apply-templates select="given-names"/>
                     <xsl:apply-templates select="surname"/>
                     <xsl:apply-templates select="prefix"/>
@@ -245,7 +250,7 @@
                         <xsl:value-of select="concat($pubmed, $pmid-cites)"/>
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:value-of select="concat($entityID, uuid:randomUUID())"/>
+                        <xsl:value-of select="concat($doc, uuid:randomUUID())"/>
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:variable>
@@ -256,21 +261,21 @@
                         <rdf:type rdf:resource="{$bibo}Document"/>
                         <bibo:citedBy rdf:resource="{concat($pubmed, $pmid)}"/>
 
-                        <xsl:for-each select="person-group/name">
-                            <dcterms:contributor>
-                                <xsl:variable name="contributor" select="concat($entityID, uuid:randomUUID())"/>
-                                <rdf:Description rdf:about="{$contributor}">
-                                    <rdf:type rdf:resource="{$foaf}Person"/>
+<!--                        <xsl:for-each select="person-group/name">-->
+<!--                            <dcterms:contributor>-->
+<!--                                <xsl:variable name="contributor" select="concat($entityID, uuid:randomUUID())"/>-->
+<!--                                <rdf:Description rdf:about="{$contributor}">-->
+<!--                                    <rdf:type rdf:resource="{$foaf}Person"/>-->
 
-                                    <foaf:publications rdf:resource="{$pmid-cites}"/>
+<!--                                    <foaf:publications rdf:resource="{$pmid-cites}"/>-->
 
-                                    <xsl:apply-templates select="given-names"/>
-                                    <xsl:apply-templates select="surname"/>
-                                    <xsl:apply-templates select="prefix"/>
-                                    <xsl:apply-templates select="suffix"/>
-                                </rdf:Description>
-                            </dcterms:contributor>
-                        </xsl:for-each>
+<!--                                    <xsl:apply-templates select="given-names"/>-->
+<!--                                    <xsl:apply-templates select="surname"/>-->
+<!--                                    <xsl:apply-templates select="prefix"/>-->
+<!--                                    <xsl:apply-templates select="suffix"/>-->
+<!--                                </rdf:Description>-->
+<!--                            </dcterms:contributor>-->
+<!--                        </xsl:for-each>-->
                     </rdf:Description>
                 </bibo:cites>
             </rdf:Description>
@@ -321,6 +326,7 @@
 
     <xsl:template match="institution">
         <foaf:name><xsl:value-of select="."/></foaf:name>
+        <rdfs:label><xsl:value-of select="."/></rdfs:label>
     </xsl:template>
     <xsl:template match="given-names">
         <foaf:firstName><xsl:value-of select="."/></foaf:firstName>
@@ -335,7 +341,7 @@
         <foaf:honorificSuffix><xsl:value-of select="."/></foaf:honorificSuffix>
     </xsl:template>
     <xsl:template match="phone">
-        <foaf:phone rdf:resource="tel:{normalize-space(.)}"/>
+        <foaf:phone rdf:resource="tel:{replace(normalize-space(.), ' ', '-')}"/>
     </xsl:template>
     <xsl:template match="fax">
         <schema:faxNumber><xsl:value-of select="normalize-space(.)"/></schema:faxNumber>
