@@ -12,6 +12,7 @@ import java.io.StringWriter;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
@@ -234,6 +235,65 @@ public class PubMedEnhancementEngineTest {
 		String text = engine.constructText(xml2rdf);
 		
 		System.out.println("TEXT FOR INDEXING: " + text);
+		
+	}
+	
+	@Test
+	public void testGetDocumentUri() {
+		
+		MGraph xml2rdf = null;
+		
+		try {
+			
+			xml2rdf = engine.transformXML(ci);
+			
+		} catch (EngineException e) {
+			 
+			System.out.println("Error while transforming the XML file into RDF");
+		}
+		
+		UriRef documentUri = engine.getDocumentUri( xml2rdf );
+		
+		System.out.println("Document URI: " + documentUri);
+		
+		Iterator<Triple> idocumentWithTitle = xml2rdf.filter(documentUri, DCTERMS.title, null);
+		
+		while(idocumentWithTitle.hasNext()){
+			
+				System.out.println("Title: " + idocumentWithTitle.next().getObject().toString());
+			
+		}
+		
+		//assertTrue(hasSameTitle);
+	}
+	
+	@Test
+	public void testGetContributors() {
+		
+		MGraph xml2rdf = null;
+		
+		try {
+			
+			xml2rdf = engine.transformXML(ci);
+			
+		} catch (EngineException e) {
+			 
+			System.out.println("Error while transforming the XML file into RDF");
+		}
+		
+		UriRef documentUri = engine.getDocumentUri( xml2rdf );
+		
+		Iterator<UriRef> icontributors = engine.getContributors(documentUri, xml2rdf).iterator();
+		
+		while(icontributors.hasNext()) {
+			UriRef contributor = icontributors.next();
+			Iterator<Triple> itriples = xml2rdf.filter(contributor, FOAF.lastName, null);
+			while(itriples.hasNext()) {
+				String lastname = itriples.next().getObject().toString();
+				System.out.println("Contributor's lastname: " + lastname);
+			}
+		}
+		
 		
 	}
 
