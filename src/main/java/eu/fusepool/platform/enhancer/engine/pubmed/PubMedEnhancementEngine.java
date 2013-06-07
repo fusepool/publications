@@ -290,43 +290,43 @@ implements EnhancementEngine, ServiceProperties {
 			Iterator<UriRef> icontributors = contributorsList.listIterator();			
 			while (icontributors.hasNext()) {
 				// create an entity annotation
-				UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this) ;
+				UriRef personEnhancement = EnhancementEngineHelper.createEntityEnhancement(ci, this) ;
 				
 				UriRef contributor = icontributors.next(); 
 				
 				// add a triple to link the enhancement to the entity referenced
-				Triple entityReference = new TripleImpl(entityAnnotation, OntologiesTerms.fiseEntityReference, contributor);
-				enhancements.add( entityReference);
+				//Triple entityReference = new TripleImpl(personEnhancement, OntologiesTerms.fiseEntityReference, contributor);
+				enhancements.add( new TripleImpl(personEnhancement, OntologiesTerms.fiseEntityReference, contributor) );
 				
 				// add a confidence value
-				Triple confidence = new TripleImpl(entityAnnotation, TechnicalClasses.FNHANCER_CONFIDENCE_LEVEL, new PlainLiteralImpl("1.0"));
-				enhancements.add(confidence);			
+				//Triple confidence = new TripleImpl(personEnhancement, TechnicalClasses.FNHANCER_CONFIDENCE_LEVEL, new PlainLiteralImpl("1.0"));
+				enhancements.add(new TripleImpl(personEnhancement, TechnicalClasses.FNHANCER_CONFIDENCE_LEVEL, new PlainLiteralImpl("1.0")) );			
 			}
 			
 			// Create an enhancement for each entity of type foaf:Organizazion that are contributors' affiliatons 
 			Iterator<Triple> iorganizations = xml2rdf.filter(null, RDF.type, FOAF.Organization) ;
 			while (iorganizations.hasNext()) {
 				// create an entity annotation
-				UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this) ;
+				UriRef organizationEnhancement = EnhancementEngineHelper.createEntityEnhancement(ci, this) ;
 				
 				UriRef organization = (UriRef) iorganizations.next().getSubject(); 
 				
 				// add a triple to link the enhancement to the entity referenced
-				Triple entityReference = new TripleImpl(entityAnnotation, OntologiesTerms.fiseEntityReference, organization);
-				enhancements.add( entityReference);
+				//Triple entityReference = new TripleImpl(organizationEnhancement, OntologiesTerms.fiseEntityReference, organization);
+				enhancements.add( new TripleImpl( organizationEnhancement, OntologiesTerms.fiseEntityReference, organization) );
 				
 				// add a confidence value
-				Triple confidence = new TripleImpl(entityAnnotation, TechnicalClasses.FNHANCER_CONFIDENCE_LEVEL, new PlainLiteralImpl("1.0"));
-				enhancements.add(confidence);			
+				//Triple confidence = new TripleImpl(organizationEnhancement, TechnicalClasses.FNHANCER_CONFIDENCE_LEVEL, new PlainLiteralImpl("1.0"));
+				enhancements.add(new TripleImpl( organizationEnhancement, TechnicalClasses.FNHANCER_CONFIDENCE_LEVEL, new PlainLiteralImpl("1.0")) );			
 			}
 			
 			// Create one enhancement for one entity of type bibo:Document that is directly related to the input XML document.
 			if( documentUri != null) {
-				UriRef patentEnhancement = EnhancementEngineHelper.createEntityEnhancement(ci, this) ;
+				UriRef documentEnhancement = EnhancementEngineHelper.createEntityEnhancement(ci, this) ;
 				// add a triple to link the enhancement to the entity			
-				enhancements.add( new TripleImpl(patentEnhancement, OntologiesTerms.fiseEntityReference, documentUri) );
+				enhancements.add( new TripleImpl(documentEnhancement, OntologiesTerms.fiseEntityReference, documentUri) );
 				// add the confidence level
-				enhancements.add( new TripleImpl(patentEnhancement, TechnicalClasses.FNHANCER_CONFIDENCE_LEVEL, new PlainLiteralImpl("1.0")) );
+				enhancements.add( new TripleImpl(documentEnhancement, TechnicalClasses.FNHANCER_CONFIDENCE_LEVEL, new PlainLiteralImpl("1.0")) );
 			}
 		}
 		
