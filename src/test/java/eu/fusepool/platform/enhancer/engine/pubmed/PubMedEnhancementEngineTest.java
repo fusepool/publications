@@ -12,6 +12,7 @@ import java.io.StringWriter;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.clerezza.rdf.core.MGraph;
 import org.apache.clerezza.rdf.core.Triple;
@@ -53,7 +54,8 @@ public class PubMedEnhancementEngineTest {
 	// If another file is used the following values must be updated accordingly
 	private static final String TEST_FOLDER = "/test/data/";
 	//private static final String TEST_FILE = "505-520.xml";
-	private static final String TEST_FILE = "AAPS_J_2008_Apr_2_10(1)_193-199.nxml";
+	//private static final String TEST_FILE = "AAPS_J_2008_Apr_2_10(1)_193-199.nxml";
+	private static final String TEST_FILE = "Arthritis_2010_Dec_20_2010_924518.nxml";
 	private final int PERSONS_NUMBER = 3; // number of entities of type foaf:Person extracted from the test file.
 
 
@@ -115,13 +117,22 @@ public class PubMedEnhancementEngineTest {
 				personsNumber += 1;
 				Triple triple = ipersons.next();
 				System.out.println(triple.toString());
-				//String subjectUri = triple.getSubject().toString();
-				//System.out.println("Filtered subject of type foaf:Person = " + subjectUri);
-				
 			}
 			
 			System.out.println("Total number of entity of type foaf:Person: " + personsNumber);
 			
+			// Filter triples for documents
+			Iterator<Triple> idocuments = graph.filter(null, RDF.type, OntologiesTerms.biboDocument) ;
+			
+			int documentsNumber = 0;
+			while (idocuments.hasNext()){
+				documentsNumber += 1;
+				Triple triple = idocuments.next();
+				System.out.println(triple.toString());
+			}
+			
+			System.out.println("Total number of entity of type bibo:Document: " + documentsNumber);
+
 			
 		}
 		else {
@@ -151,21 +162,28 @@ public class PubMedEnhancementEngineTest {
 			System.out.println("Error while transforming the XML file into RDF");
 		}
 		
-		MGraph graph = engine.addEnhancements(ci, xml2rdf);
+		MGraph enhancementGraph = engine.addEnhancements(ci, xml2rdf);
 		
 		
 		
-		if (! graph.isEmpty()) {
+		if (! enhancementGraph.isEmpty()) {
 			
 			int entityReferences = 0;
-			// Filter triples for entities annotations
-			Iterator<Triple> ireferences = graph.filter(null, OntologiesTerms.fiseEntityReference, null);
+			// Filter triples for entities references
+			Iterator<Triple> ireferences = enhancementGraph.filter(null, OntologiesTerms.fiseEntityReference, null);
 			while (ireferences.hasNext()) {
 				entityReferences += 1;
-				Triple triple = ireferences.next();
-				String enhancement = triple.getSubject().toString();
-				String entity = triple.getObject().toString();
-				System.out.println("Entity references " + entityReferences + ") "  + enhancement + " entity reference: " + entity);
+				Triple reference = ireferences.next();
+				//Triple enhancement-reference: <enhancement> <fise:entity-reference> <entity>
+				UriRef enhancement = (UriRef) reference.getSubject();
+				UriRef entity = (UriRef) reference.getObject();
+				// entity type
+				Iterator<Triple> itypes = xml2rdf.filter(entity, RDF.type, null);
+				String entityType = "";
+				while(itypes.hasNext()) {
+					entityType = itypes.next().getObject().toString();
+				}
+				System.out.println("Entity references " + entityReferences + ") "  + enhancement + ", entity reference: " + entity + ", type: " + entityType);
 			}
 			
 			System.out.println("Total number of entity references: " + entityReferences);
@@ -234,6 +252,65 @@ public class PubMedEnhancementEngineTest {
 		String text = engine.constructText(xml2rdf);
 		
 		System.out.println("TEXT FOR INDEXING: " + text);
+		
+	}
+	
+	@Test
+	public void testGetDocumentUri() {
+		
+		MGraph xml2rdf = null;
+		
+		try {
+			
+			xml2rdf = engine.transformXML(ci);
+			
+		} catch (EngineException e) {
+			 
+			System.out.println("Error while transforming the XML file into RDF");
+		}
+		
+		UriRef documentUri = engine.getDocumentUri( xml2rdf );
+		
+		System.out.println("Document URI: " + documentUri);
+		
+		Iterator<Triple> idocumentWithTitle = xml2rdf.filter(documentUri, DCTERMS.title, null);
+		
+		while(idocumentWithTitle.hasNext()){
+			
+				System.out.println("Title: " + idocumentWithTitle.next().getObject().toString());
+			
+		}
+		
+		//assertTrue(hasSameTitle);
+	}
+	
+	@Test
+	public void testGetContributors() {
+		
+		MGraph xml2rdf = null;
+		
+		try {
+			
+			xml2rdf = engine.transformXML(ci);
+			
+		} catch (EngineException e) {
+			 
+			System.out.println("Error while transforming the XML file into RDF");
+		}
+		
+		UriRef documentUri = engine.getDocumentUri( xml2rdf );
+		
+		Iterator<UriRef> icontributors = engine.getContributors(documentUri, xml2rdf).iterator();
+		
+		while(icontributors.hasNext()) {
+			UriRef contributor = icontributors.next();
+			Iterator<Triple> itriples = xml2rdf.filter(contributor, FOAF.lastName, null);
+			while(itriples.hasNext()) {
+				String lastname = itriples.next().getObject().toString();
+				System.out.println("Contributor's lastname: " + lastname);
+			}
+		}
+		
 		
 	}
 

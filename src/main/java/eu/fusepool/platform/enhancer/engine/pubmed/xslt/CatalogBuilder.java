@@ -20,6 +20,8 @@ import java.util.zip.ZipFile;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author giorgio
@@ -35,10 +37,13 @@ public class CatalogBuilder {
 
 	final static String BASE_DTD = "dtd"+File.separator ;
 	final static String BASE_ZIP = "zip"+File.separator ;
+	final static String BASE_DTD_RESOURCES = "/dtd/" ;
 
 
 	private final BundleContext bundleContext ;
 
+	final Logger logger = LoggerFactory.getLogger(this.getClass()) ;
+	
 	//private String dtdAbsPath ;
 
 	public CatalogBuilder(BundleContext ctx) {
@@ -99,6 +104,7 @@ public class CatalogBuilder {
 			if(os!=null)
 				os.close() ;
 		}
+		logger.debug("XML Catalog created") ;
 	}
 
 
@@ -109,7 +115,7 @@ public class CatalogBuilder {
 			zipDir.mkdirs() ;
 		}
 
-		InputStream is = getClass().getResourceAsStream("/"+zipRes) ;
+		InputStream is = getClass().getResourceAsStream(BASE_DTD_RESOURCES+zipRes) ;
 		File destFile = bundleContext.getDataFile(zipPath+zipRes) ;
 		OutputStream os = new FileOutputStream(destFile) ;
 		IOUtils.copy(is, os) ;
@@ -220,8 +226,7 @@ public class CatalogBuilder {
 				}
 //				zipInput.closeEntry();
 				out.close() ;
-			
-				//System.out.println("file unzip : "+ newFile.getAbsoluteFile());
+				logger.debug("Created file: "+newFile.getAbsoluteFile()) ;
 			}
 			zf.close() ;
 		}catch(IOException ex){

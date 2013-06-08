@@ -1,5 +1,7 @@
 # Publications
 
+RDF-izer (Extractor) for PubMed XML articles.
+
 ## Goals
 
 * Transforming PubMed XML to RDF/XML

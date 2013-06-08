@@ -7,6 +7,8 @@ import java.io.IOException;
 
 import org.apache.xerces.util.XMLCatalogResolver;
 import org.apache.xml.resolver.tools.ResolvingXMLReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
@@ -17,6 +19,7 @@ import org.xml.sax.SAXNotRecognizedException;
  */
 public class PubMedXMLReader extends ResolvingXMLReader {
 
+	final Logger logger = LoggerFactory.getLogger(this.getClass()) ;
 	
 	XMLCatalogResolver resolver ;
 	
@@ -61,17 +64,17 @@ public class PubMedXMLReader extends ResolvingXMLReader {
 	@Override
 	public InputSource resolveEntity(String publicId, String systemId) {
 		try {
-			//System.out.println("<public publicId=\""+publicId+"\"" + " uri=\""+systemId+"\" />");
+			logger.debug("<public publicId=\""+publicId+"\"" + " uri=\""+systemId+"\" />");
 			InputSource is = resolver.resolveEntity(publicId, systemId);
 			if(is==null) {
-				System.out.println("############ NOT FOUND #########<public publicId=\""+publicId+"\"" + " uri=\""+systemId+"\" />");
+				logger.warn("# NOT FOUND #<public publicId=\""+publicId+"\"" + " uri=\""+systemId+"\" />");
 			}
 			return is ;
 		} catch (SAXException e) {
-			e.printStackTrace();
+			logger.error("Error resolving entity", e);
 			return null ;
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Error resolving entity", e);
 			return null ;
 		}
 	}

@@ -5,9 +5,11 @@ import static org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHe
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,6 +48,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.fusepool.platform.enhancer.engine.pubmed.OntologiesTerms;
 import eu.fusepool.platform.enhancer.engine.pubmed.xslt.CatalogBuilder;
 import eu.fusepool.platform.enhancer.engine.pubmed.xslt.XMLProcessor;
 import eu.fusepool.platform.enhancer.engine.pubmed.xslt.impl.PubMedXMLProcessor;
@@ -166,7 +169,7 @@ implements EnhancementEngine, ServiceProperties {
 	public void computeEnhancements(ContentItem ci) throws EngineException {
 
 		UriRef contentItemId = ci.getUri();
-		logger.info("UriRef: "+contentItemId.getUnicodeString()) ;
+		logger.info("UriRef: " + contentItemId.getUnicodeString()) ;
 				
 		try {
 			
@@ -199,7 +202,8 @@ implements EnhancementEngine, ServiceProperties {
 	/*
 	 *  Add a part to the content item as a text/plain representation of the XML document to be
 	 *  used by the ECS for indexing. The part text is constructed from triples properties values so 
-	 *  this method must be called after the xml to rdf transformation.
+	 *  this method must be called after the xml to rdf transformation and after the rdf triple have 
+	 *  been added to the content item metadata.
 	 */
 	public void addPartToContentItem(ContentItem ci) {
 		
@@ -233,7 +237,7 @@ implements EnhancementEngine, ServiceProperties {
 		}
 		
 		
-		logger.debug("Finished adding plain text representation");
+		logger.debug("Finished adding plain text part representation");
 	}
 	
 	/*
@@ -267,31 +271,62 @@ implements EnhancementEngine, ServiceProperties {
 	
 	/*
 	 * Create an entity annotation for each entity found by the transformation of the XML document. 
-	 * Each annotation is referred to its entity.
+	 * Each annotation is referred to its entity. The types of entities are: 
+	 * foaf:Person
+	 * foaf:Organization
+	 * bibo:Document
+	 * pmo:PatentPublication, schema:PostalAddress
 	 */
 	public MGraph addEnhancements(ContentItem ci, MGraph xml2rdf) {
 		
 		MGraph enhancements = new IndexedMGraph();
 		
+		UriRef documentUri = getDocumentUri(xml2rdf); //uri of the document in the content item (not of other document mentioned in it)
+		
 		if (! xml2rdf.isEmpty()) {
 			
-			Iterator<Triple> ipersons = xml2rdf.filter(null, RDF.type, FOAF.Person) ;
-			
-			
-			while (ipersons.hasNext()) {
+			// Create an enhancement for each entity of type foaf:Person that are contributors of the document
+			List<UriRef> contributorsList = getContributors(documentUri,xml2rdf);
+			Iterator<UriRef> icontributors = contributorsList.listIterator();			
+			while (icontributors.hasNext()) {
 				// create an entity annotation
-				UriRef entityAnnotation = EnhancementEngineHelper.createEntityEnhancement(ci, this) ;
+				UriRef personEnhancement = EnhancementEngineHelper.createEntityEnhancement(ci, this) ;
 				
-				Triple person = ipersons.next();
-				NonLiteral subPerson = person.getSubject(); 
+				UriRef contributor = icontributors.next(); 
 				
 				// add a triple to link the enhancement to the entity referenced
-				Triple entityReference = new TripleImpl(entityAnnotation, OntologiesTerms.fiseEntityReference, subPerson);
-				enhancements.add( entityReference);
+				//Triple entityReference = new TripleImpl(personEnhancement, OntologiesTerms.fiseEntityReference, contributor);
+				enhancements.add( new TripleImpl(personEnhancement, OntologiesTerms.fiseEntityReference, contributor) );
 				
 				// add a confidence value
-				Triple confidence = new TripleImpl(entityAnnotation, TechnicalClasses.FNHANCER_CONFIDENCE_LEVEL, new PlainLiteralImpl("1.0"));
-				enhancements.add(confidence);			
+				//Triple confidence = new TripleImpl(personEnhancement, TechnicalClasses.FNHANCER_CONFIDENCE_LEVEL, new PlainLiteralImpl("1.0"));
+				enhancements.add(new TripleImpl(personEnhancement, TechnicalClasses.FNHANCER_CONFIDENCE_LEVEL, new PlainLiteralImpl("1.0")) );			
+			}
+			
+			// Create an enhancement for each entity of type foaf:Organizazion that are contributors' affiliatons 
+			Iterator<Triple> iorganizations = xml2rdf.filter(null, RDF.type, FOAF.Organization) ;
+			while (iorganizations.hasNext()) {
+				// create an entity annotation
+				UriRef organizationEnhancement = EnhancementEngineHelper.createEntityEnhancement(ci, this) ;
+				
+				UriRef organization = (UriRef) iorganizations.next().getSubject(); 
+				
+				// add a triple to link the enhancement to the entity referenced
+				//Triple entityReference = new TripleImpl(organizationEnhancement, OntologiesTerms.fiseEntityReference, organization);
+				enhancements.add( new TripleImpl( organizationEnhancement, OntologiesTerms.fiseEntityReference, organization) );
+				
+				// add a confidence value
+				//Triple confidence = new TripleImpl(organizationEnhancement, TechnicalClasses.FNHANCER_CONFIDENCE_LEVEL, new PlainLiteralImpl("1.0"));
+				enhancements.add(new TripleImpl( organizationEnhancement, TechnicalClasses.FNHANCER_CONFIDENCE_LEVEL, new PlainLiteralImpl("1.0")) );			
+			}
+			
+			// Create one enhancement for one entity of type bibo:Document that is directly related to the input XML document.
+			if( documentUri != null) {
+				UriRef documentEnhancement = EnhancementEngineHelper.createEntityEnhancement(ci, this) ;
+				// add a triple to link the enhancement to the entity			
+				enhancements.add( new TripleImpl(documentEnhancement, OntologiesTerms.fiseEntityReference, documentUri) );
+				// add the confidence level
+				enhancements.add( new TripleImpl(documentEnhancement, TechnicalClasses.FNHANCER_CONFIDENCE_LEVEL, new PlainLiteralImpl("1.0")) );
 			}
 		}
 		
@@ -300,46 +335,132 @@ implements EnhancementEngine, ServiceProperties {
 	
 	/*
 	 * Creates a string filled with values from properties:
-	 * foaf:name of inventors and applicants
 	 * dcterms:title of the publication
 	 * dcterms:abstract of the publication
+	 * foaf:firstName and foaf:lastName of contributors
 	 * The text is used for indexing. The graph passed as argument must contain the RDF triples created after the transformation.
-	 * 
 	 */
-	public String constructText(MGraph graph) {
+	public String constructText(MGraph xml2rdf) {
 		
 		String text = "";
 		
-		UriRef documentUri = null;
+		UriRef documentUri = getDocumentUri(xml2rdf);
 		
-		// Get the titles. There might be three titles for en, fr, de.
-		Iterator<Triple> ititles = graph.filter(documentUri, DCTERMS.title, null);
+		// Get all the foaf:firstName and foaf:lastName of entities of type foaf:Person (contributors).
+		Iterator<UriRef> ipersonNames = getContributors(documentUri, xml2rdf).iterator();
+		
+		while(ipersonNames.hasNext()) {
+			
+			String personName = "";
+			
+			UriRef contributor = ipersonNames.next();
+			
+			Iterator<Triple> inames = xml2rdf.filter(contributor, FOAF.firstName, null);
+			while(inames.hasNext()) {
+				personName += unquote( inames.next().getObject().toString() ) + " ";
+			}
+			Iterator<Triple> ilastnames = xml2rdf.filter(contributor, FOAF.lastName, null);
+			while(ilastnames.hasNext()) {
+				personName += unquote( ilastnames.next().getObject().toString() ) + " ";
+			}
+			
+			text += personName;
+		}
+		
+		// Get the title
+		Iterator<Triple> ititles = xml2rdf.filter(documentUri, DCTERMS.title, null);
 		String title = "";
 		while(ititles.hasNext()) {
-			title = ititles.next().getObject().toString() + " ";
+			title = unquote( ititles.next().getObject().toString() ) + " ";
 			text += title;
 		}
 		
 		
-		// Get the abstracts. There might be three abstracts for en, fr, de.
-		Iterator<Triple> iabstracts = graph.filter(documentUri, DCTERMS.abstract_, null);
+		// Get the abstract
+		Iterator<Triple> iabstracts = xml2rdf.filter(documentUri, DCTERMS.abstract_, null);
 		String abstract_ = " ";
 		while(iabstracts.hasNext()) {
-			title = iabstracts.next().getObject().toString() + " ";
+			abstract_ = unquote( iabstracts.next().getObject().toString() ) + " ";
 			text += abstract_;
 		}
 		
-		// Get all the foaf:name of entities of type foaf:Person.
-		Iterator<Triple> inames = graph.filter(null, FOAF.name, null);
-		String name = "";
-		while(inames.hasNext()) {
-			title = inames.next().getObject().toString() + " ";
-			text += name;
+		// Get the organization of affiliation
+		Iterator<Triple> iorganizations = xml2rdf.filter(null, RDF.type, FOAF.Organization);
+		String organizationName = "";
+		while(iorganizations.hasNext()) {
+			UriRef organization = (UriRef) iorganizations.next().getSubject();
+			Iterator<Triple> inames = xml2rdf.filter(organization, FOAF.name, null);
+			while(inames.hasNext()) {
+				organizationName += unquote( inames.next().getObject().toString() );
+			}
+			
+			text += organizationName;
+			
 		}
-		
 		logger.info("Text to be indexed" + text);
 		
 		return text;
+	}
+	
+	/*
+	 * Retrieves the uri that refers to the original document. As this publication can refer to other publication the first one must be
+	 * selected using properties that are filled that are not for the mentioned document as title and abstract. These properties can also be used for the plain text
+	 * representation of the document to be indexed instead of the full XML document. 
+	 */
+	public UriRef getDocumentUri(MGraph xml2rdf) {
+		
+		UriRef documentUri = null;
+		
+		Iterator<Triple> idocuments = xml2rdf.filter(null, RDF.type, OntologiesTerms.biboDocument) ;
+		
+		while(idocuments.hasNext()) {
+			
+			UriRef documentUriTemp = (UriRef) idocuments.next().getSubject();
+			// Filter triple with a bibo:Document as subject and with dcterms:title property filled. There exist only one such triple in each 
+			// document.
+			Iterator<Triple> idocumentWithTitle = xml2rdf.filter(documentUriTemp, DCTERMS.title, null);
+			while(idocumentWithTitle.hasNext()) {
+				documentUri = (UriRef) idocumentWithTitle.next().getSubject(); 
+			}
+			
+		}
+				
+		return documentUri;
+	
+	}
+	
+	/*
+	 * Gets a list of all contributors of the document. It returns a list of contributors' URIs 
+	 */
+	public List<UriRef> getContributors(UriRef documentUri, MGraph xml2rdf) {
+		
+		List<UriRef> contributors = new ArrayList<UriRef>();
+		
+		Iterator<Triple> icontributors = xml2rdf.filter(documentUri, DCTERMS.contributor, null);
+		
+		while(icontributors.hasNext()) {
+			
+			contributors.add((UriRef) icontributors.next().getObject());
+			
+		}
+		
+		return contributors;
+	}
+	
+	/*
+	 * Removes quotations from properties values
+	 * 
+	 */
+	public String unquote(String string) {
+		String result = "";
+		
+		if(string.length() > 3) {
+		
+			result = string.replace('"', ' ');
+		
+		}
+		
+		return result;
 	}
 	
 	@Override
