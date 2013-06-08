@@ -1,4 +1,4 @@
-<!--
+    <!--
     Author: Sarven Capadisli <info@csarven.ca>
     Author URI: http://csarven.ca/#i
 
@@ -101,7 +101,17 @@
 
     <xsl:template match="journal-meta">
         <xsl:variable name="pmid" select="key('pub-id-type', 'pmid')"/>
-        <xsl:variable name="issn" select="normalize-space(issn[@pub-type='epub'])"/>
+        <xsl:variable name="issn">
+            <xsl:variable name="i" select="normalize-space(issn[@pub-type='epub'])"/>
+            <xsl:choose>
+                <xsl:when test="$i != ''">
+                    <xsl:value-of select="$i">
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="normalize-space(issn[@pub-type='ppub'])">
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
 
         <xsl:variable name="issue" select="normalize-space(../article-meta/issue)"/>
 
