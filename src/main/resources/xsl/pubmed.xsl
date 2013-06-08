@@ -105,10 +105,10 @@
             <xsl:variable name="i" select="normalize-space(issn[@pub-type='epub'])"/>
             <xsl:choose>
                 <xsl:when test="$i != ''">
-                    <xsl:value-of select="$i">
+                    <xsl:value-of select="$i"/>
                 </xsl:when>
                 <xsl:otherwise>
-                    <xsl:value-of select="normalize-space(issn[@pub-type='ppub'])">
+                    <xsl:value-of select="normalize-space(issn[@pub-type='ppub'])"/>
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
