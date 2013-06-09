@@ -252,7 +252,7 @@
         <xsl:variable name="pmid" select="key('pub-id-type', 'pmid')"/>
 
         <xsl:for-each select="ref-list/ref/*[local-name() = 'element-citation' or local-name() = 'mixed-citation' or local-name() = 'citation']">
-            <xsl:variable name="pmid-cites" select="pub-id[@pub-id-type = 'pmid']"/>
+            <xsl:variable name="pmid-cites" select="pub-id[@pub-id-type = 'pmid'][1]"/>
 
             <xsl:variable name="pmid-cites">
                 <xsl:choose>
