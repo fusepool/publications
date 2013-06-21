@@ -327,7 +327,7 @@
     </xsl:template>
 
     <xsl:template match="abstract">
-        <dcterms:abstract><xsl:value-of select="descendant-or-self::p/text()"/></dcterms:abstract>
+        <dcterms:abstract><xsl:value-of select="descendant::*/text()"/></dcterms:abstract>
     </xsl:template>
     <xsl:template match="permissions/license/@xlink:href">
         <dcterms:license rdf:resource="{normalize-space(.)}"/>
