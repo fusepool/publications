@@ -48,7 +48,7 @@
 
 
     <xsl:template match="front">
-        <xsl:variable name="pmid" select="key('pub-id-type', 'pmid')"/>
+        <xsl:variable name="pmcid" select="key('pub-id-type', 'pmc')"/>
 
         <xsl:variable name="affiliations">
             <rdf:RDF>
@@ -88,7 +88,7 @@
             </rdf:RDF>
         </xsl:variable>
 
-        <rdf:Description rdf:about="{concat($pubmed, $pmid)}">
+        <rdf:Description rdf:about="{concat($pmc, $pmcid)}">
             <rdf:type rdf:resource="{$bibo}Document"/>
 
             <xsl:apply-templates select="journal-meta"/>
@@ -100,7 +100,8 @@
     </xsl:template>
 
     <xsl:template match="journal-meta">
-        <xsl:variable name="pmid" select="key('pub-id-type', 'pmid')"/>
+        <xsl:variable name="pmcid" select="key('pub-id-type', 'pmc')"/>
+
         <xsl:variable name="issn">
             <xsl:variable name="i" select="normalize-space(issn[@pub-type='epub'])"/>
             <xsl:choose>
@@ -127,7 +128,7 @@
         <dcterms:isPartOf>
             <rdf:Description rdf:about="{$issueURL}">
                 <rdf:type rdf:resource="{$bibo}Issue"/>
-                <dcterms:hasPart rdf:resource="{concat($pubmed, $pmid)}"/>
+                <dcterms:hasPart rdf:resource="{concat($pmc, $pmcid)}"/>
                 <bibo:issue><xsl:value-of select="$issue"/></bibo:issue>
 
                 <xsl:if test="$issue != ''">
@@ -154,6 +155,8 @@
     <xsl:template name="article-meta">
         <xsl:param name="affiliations" tunnel="yes"/>
 
+        <xsl:variable name="pmcid" select="key('pub-id-type', 'pmc')"/>
+
         <xsl:for-each select="article-meta">
             <xsl:for-each select="article-id">
                 <xsl:variable name="pub-id-type" select="@pub-id-type"/>
@@ -167,17 +170,20 @@
                         <owl:sameAs rdf:resource="http://dx.doi.org/{$value}"/>
                     </xsl:when>
                     <xsl:when test="$pub-id-type = 'pmc'">
-                        <dcterms:source rdf:resource="http://www.ncbi.nlm.nih.gov/pmc/articles/{$value}"/>
                         <owl:sameAs rdf:resource="http://biotea.idiginfo.org/pubmedOpenAccess/rdf/PMC{$value}"/>
-                        <owl:sameAs rdf:resource="http://www.ncbi.nlm.nih.gov/pmc/articles/{$value}"/>
-                        <dcterms:isFormatOf rdf:resource="http://www.ncbi.nlm.nih.gov/pmc/articles/{$value}"/>
+                        <dcterms:isFormatOf rdf:resource="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC{$value}"/>
                     </xsl:when>
                     <xsl:when test="$pub-id-type = 'pmid'">
                         <bibo:pmid><xsl:value-of select="$value"/></bibo:pmid>
-                        <owl:sameAs rdf:resource="http://www.ncbi.nlm.nih.gov/pubmed/{$value}"/>
+                        <owl:sameAs>
+                            <rdf:Description rdf:about="{concat($pubmed, $value)}">
+                                <owl:sameAs rdf:resource="{concat($pmc, $pmcid)}"/>
+                            </rdf:Description>
+                        </owl:sameAs>
                         <owl:sameAs rdf:resource="http://linkedlifedata.com/resource/pubmed/id/{$value}"/>
+                        <owl:sameAs rdf:resource="http://bio2rdf.org/pubmed:{$value}"/>
+                        <rdfs:seeAlso rdf:resource="http://www.ncbi.nlm.nih.gov/pubmed/{$value}"/>
                         <rdfs:seeAlso rdf:resource="http://identifiers.org/pubmed/{$value}"/>
-                        <rdfs:seeAlso rdf:resource="http://bio2rdf.org/pubmed:{$value}"/>
                         <rdfs:seeAlso rdf:resource="http://europepmc.org/abstract/MED/{$value}"/>
                         <rdfs:seeAlso rdf:resource="http://www.hubmed.org/display.cgi?uids={$value}"/>
                     </xsl:when>
@@ -197,20 +203,22 @@
             <xsl:apply-templates select="permissions/license/@xlink:href"/>
 
             <xsl:for-each select="contrib-group/contrib">
-                <xsl:call-template name="contributor">
-                    <xsl:with-param name="pub-id-type" select="'pmid'"/>
-                    <xsl:with-param name="pub-id" select="key('pub-id-type', 'pmid')"/>
+                <xsl:call-template name="contributor"/>
+<!--                    <xsl:with-param name="pub-id-type" select="'pmc'"/>-->
+<!--                    <xsl:with-param name="pub-id" select="key('pub-id-type', 'pmc')"/>-->
     <!--                <xsl:with-param name="affiliations" select="$affiliations"/>-->
-                </xsl:call-template>
+<!--                </xsl:call-template>-->
             </xsl:for-each>
         </xsl:for-each>
     </xsl:template>
 
 
     <xsl:template name="contributor">
-        <xsl:param name="pub-id-type"/>
-        <xsl:param name="pub-id"/>
+<!--        <xsl:param name="pub-id-type"/>-->
+<!--        <xsl:param name="pub-id"/>-->
         <xsl:param name="affiliations" tunnel="yes"/>
+
+        <xsl:variable name="pmcid" select="key('pub-id-type', 'pmc')"/>
 
         <xsl:variable name="contributor" select="concat($entityID, uuid:randomUUID())"/>
 <!--        <xsl:variable name="corresp" select="@corresp"/>-->
@@ -220,7 +228,7 @@
             <rdf:Description rdf:about="{$contributor}">
                 <rdf:type rdf:resource="{$foaf}Person"/>
 
-                <foaf:publications rdf:resource="{concat(fn:getPubURIBase($pub-id-type), $pub-id)}"/>
+                <foaf:publications rdf:resource="{concat($pmc, $pmcid)}"/>
 
                 <xsl:for-each select="name">
                     <xsl:if test="given-names and surname">
@@ -249,13 +257,17 @@
 
 
     <xsl:template match="back">
-        <xsl:variable name="pmid" select="key('pub-id-type', 'pmid')"/>
+        <xsl:variable name="pmcid" select="key('pub-id-type', 'pmc')"/>
 
         <xsl:for-each select="ref-list/ref/*[local-name() = 'element-citation' or local-name() = 'mixed-citation' or local-name() = 'citation']">
+            <xsl:variable name="pmcid-cites" select="pub-id[@pub-id-type = 'pmc'][1]"/>
             <xsl:variable name="pmid-cites" select="pub-id[@pub-id-type = 'pmid'][1]"/>
 
-            <xsl:variable name="pmid-cites">
+            <xsl:variable name="p-cites">
                 <xsl:choose>
+                    <xsl:when test="$pmcid-cites != ''">
+                        <xsl:value-of select="concat($pmc, $pmcid-cites)"/>
+                    </xsl:when>
                     <xsl:when test="$pmid-cites != ''">
                         <xsl:value-of select="concat($pubmed, $pmid-cites)"/>
                     </xsl:when>
@@ -265,11 +277,15 @@
                 </xsl:choose>
             </xsl:variable>
 
-            <rdf:Description rdf:about="{concat($pubmed, $pmid)}">
+            <rdf:Description rdf:about="{concat($pmc, $pmcid)}">
                 <bibo:cites>
-                    <rdf:Description rdf:about="{$pmid-cites}">
+                    <rdf:Description rdf:about="{$p-cites}">
                         <rdf:type rdf:resource="{$bibo}Document"/>
-                        <bibo:citedBy rdf:resource="{concat($pubmed, $pmid)}"/>
+                        <bibo:citedBy rdf:resource="{concat($pmc, $pmcid)}"/>
+
+                        <xsl:if test="$pmid-cites != ''">
+                            <rdfs:seeAlso rdf:resource="http://www.ncbi.nlm.nih.gov/pubmed/{$pmid-cites}"/>
+                        </xsl:if>
 
 <!--                        <xsl:for-each select="person-group/name">-->
 <!--                            <dcterms:contributor>-->

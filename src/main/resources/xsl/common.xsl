@@ -32,6 +32,7 @@
     <xsl:variable name="property" select="concat($baseURI, 'property', $uriThingSeparator)"/>
     <xsl:variable name="doc" select="concat($baseURI, 'doc/')"/>
     <xsl:variable name="pubmed" select="concat($doc, 'pubmed/')"/>
+    <xsl:variable name="pmc" select="concat($doc, 'pmc/')"/>
     <xsl:variable name="journal" select="concat($doc, 'journal/')"/>
     <xsl:variable name="ncbipmc" select="'http://www.ncbi.nlm.nih.gov/pmc/articles/'"/>
     <xsl:variable name="doi" select="'http://dx.doi.org/'"/>
@@ -151,14 +152,14 @@
         <xsl:param name="pub-id-type"/>
 
         <xsl:choose>
-            <xsl:when test="$pub-id-type = 'doi'">
-                <xsl:value-of select="$doi"/>
-            </xsl:when>
             <xsl:when test="$pub-id-type = 'pmc'">
-                <xsl:value-of select="$ncbipmc"/>
+                <xsl:value-of select="$pmc"/>
             </xsl:when>
             <xsl:when test="$pub-id-type = 'pmid'">
                 <xsl:value-of select="$pubmed"/>
+            </xsl:when>
+            <xsl:when test="$pub-id-type = 'doi'">
+                <xsl:value-of select="$doi"/>
             </xsl:when>
             <xsl:otherwise>
             </xsl:otherwise>
