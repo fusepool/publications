@@ -4,7 +4,7 @@ namespace="http://fusepool.info/";
 repoMeta="/home/fusepool/patents-reengineering/data/meta/";
 pubmed="/data-new/pmc/";
 xslPubMed="../src/main/resources/xsl/pubmed.xsl";
-tdbAssembler="/usr/lib/fuseki/tdb.pubmed.ttl";
+tdbAssembler="/usr/lib/fuseki/tdb.fusepool.ttl";
 JVM_ARGS="-Xmx32000M";
 db="/data/tdb/fusepool/";
 javatdbloader="java $JVM_ARGS tdb.tdbloader --desc=$tdbAssembler";
