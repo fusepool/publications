@@ -28,8 +28,7 @@
     <xsl:variable name="provenance" select="concat($baseURI, 'prov', $uriThingSeparator)"/>
     <xsl:variable name="concept" select="concat($baseURI, 'concept/')"/>
     <xsl:variable name="code" select="concat($baseURI, 'code/')"/>
-    <xsl:variable name="class" select="concat($baseURI, 'class', $uriThingSeparator)"/>
-    <xsl:variable name="property" select="concat($baseURI, 'property', $uriThingSeparator)"/>
+    <xsl:variable name="fp" select="concat($baseURI, 'vocab#')"/>
     <xsl:variable name="doc" select="concat($baseURI, 'doc/')"/>
     <xsl:variable name="pubmed" select="concat($doc, 'pubmed/')"/>
     <xsl:variable name="pmc" select="concat($doc, 'pmc/')"/>

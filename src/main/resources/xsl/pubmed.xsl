@@ -16,7 +16,7 @@
     xmlns:prov="http://www.w3.org/ns/prov#"
     xmlns:skos="http://www.w3.org/2004/02/skos/core#"
     xmlns:xkos="http://purl.org/linked-data/xkos#"
-    xmlns:property="http://fusepool.info/property/"
+    xmlns:fp="http://fusepool.info/vocab#"
     xmlns:schema="http://schema.org/"
     xmlns:bibo="http://purl.org/ontology/bibo/"
     xmlns:xlink="http://www.w3.org/1999/xlink"
