@@ -168,7 +168,8 @@
                 <xsl:choose>
                     <xsl:when test="$pub-id-type = 'doi'">
                         <bibo:doi><xsl:value-of select="$value"/></bibo:doi>
-                        <owl:sameAs rdf:resource="http://dx.doi.org/{$value}"/>
+                        <xsl:variable name="valueIRISafe" select="replace(replace($value, '&lt;', '%3C'), '&gt;', '%3E')"/>
+                        <owl:sameAs rdf:resource="http://dx.doi.org/{$valueIRISafe}"/>
                     </xsl:when>
                     <xsl:when test="$pub-id-type = 'pmc'">
                         <owl:sameAs rdf:resource="http://biotea.idiginfo.org/pubmedOpenAccess/rdf/PMC{$value}"/>
