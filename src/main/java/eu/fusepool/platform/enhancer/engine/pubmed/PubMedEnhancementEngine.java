@@ -346,6 +346,23 @@ implements EnhancementEngine, ServiceProperties {
 		
 		UriRef documentUri = getDocumentUri(xml2rdf);
 		
+		// Get the title
+		Iterator<Triple> ititles = xml2rdf.filter(documentUri, DCTERMS.title, null);
+		String title = "";
+		while(ititles.hasNext()) {
+			title = unquote( ititles.next().getObject().toString() ) + " ";
+			text += title;
+		}
+		
+		
+		// Get the abstract
+		Iterator<Triple> iabstracts = xml2rdf.filter(documentUri, DCTERMS.abstract_, null);
+		String abstract_ = " ";
+		while(iabstracts.hasNext()) {
+			abstract_ = unquote( iabstracts.next().getObject().toString() ) + " ";
+			text += abstract_;
+		}
+		
 		// Get all the foaf:firstName and foaf:lastName of entities of type foaf:Person (contributors).
 		Iterator<UriRef> ipersonNames = getContributors(documentUri, xml2rdf).iterator();
 		
@@ -365,23 +382,6 @@ implements EnhancementEngine, ServiceProperties {
 			}
 			
 			text += personName;
-		}
-		
-		// Get the title
-		Iterator<Triple> ititles = xml2rdf.filter(documentUri, DCTERMS.title, null);
-		String title = "";
-		while(ititles.hasNext()) {
-			title = unquote( ititles.next().getObject().toString() ) + " ";
-			text += title;
-		}
-		
-		
-		// Get the abstract
-		Iterator<Triple> iabstracts = xml2rdf.filter(documentUri, DCTERMS.abstract_, null);
-		String abstract_ = " ";
-		while(iabstracts.hasNext()) {
-			abstract_ = unquote( iabstracts.next().getObject().toString() ) + " ";
-			text += abstract_;
 		}
 		
 		// Get the organization of affiliation
