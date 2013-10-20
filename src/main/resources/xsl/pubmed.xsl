@@ -42,6 +42,7 @@
     <xsl:template match="/article">
         <rdf:RDF>
             <xsl:apply-templates select="front"/>
+            <xsl:apply-templates select="body"/>
             <xsl:apply-templates select="back"/>
         </rdf:RDF>
     </xsl:template>
@@ -167,7 +168,8 @@
                 <xsl:choose>
                     <xsl:when test="$pub-id-type = 'doi'">
                         <bibo:doi><xsl:value-of select="$value"/></bibo:doi>
-                        <owl:sameAs rdf:resource="http://dx.doi.org/{$value}"/>
+                        <xsl:variable name="valueIRISafe" select="replace(replace($value, '&lt;', '%3C'), '&gt;', '%3E')"/>
+                        <owl:sameAs rdf:resource="http://dx.doi.org/{$valueIRISafe}"/>
                     </xsl:when>
                     <xsl:when test="$pub-id-type = 'pmc'">
                         <owl:sameAs rdf:resource="http://biotea.idiginfo.org/pubmedOpenAccess/rdf/PMC{$value}"/>
@@ -326,9 +328,33 @@
         <bibo:numPages><xsl:value-of select="."/></bibo:numPages>
     </xsl:template>
 
-    <xsl:template match="abstract">
-        <dcterms:abstract><xsl:value-of select="descendant::*/text()"/></dcterms:abstract>
+    <xsl:template match="*">
+        <xsl:element name="{local-name()}" namespace="http://www.w3.org/1999/xhtml">
+            <xsl:copy-of select="@*"/>
+            <xsl:apply-templates/>
+        </xsl:element>
     </xsl:template>
+
+    <xsl:template match="abstract">
+        <dcterms:abstract rdf:parseType="Literal">
+            <div xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+               <xsl:apply-templates/>
+            </div>
+        </dcterms:abstract>
+    </xsl:template>
+
+    <xsl:template match="body">
+        <xsl:variable name="pmcid" select="key('pub-id-type', 'pmc')"/>
+
+        <rdf:Description rdf:about="{concat($pmc, $pmcid)}">
+            <dcterms:description rdf:parseType="Literal">
+                <div xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+                   <xsl:apply-templates/>
+                </div>
+            </dcterms:description>
+        </rdf:Description>
+    </xsl:template>
+
     <xsl:template match="permissions/license/@xlink:href">
         <dcterms:license rdf:resource="{normalize-space(.)}"/>
     </xsl:template>
