@@ -54,8 +54,8 @@ public class PubMedEnhancementEngineTest {
 	// If another file is used the following values must be updated accordingly
 	private static final String TEST_FOLDER = "/test/data/";
 	//private static final String TEST_FILE = "505-520.xml";
-	//private static final String TEST_FILE = "AAPS_J_2008_Apr_2_10(1)_193-199.nxml";
-	private static final String TEST_FILE = "Arthritis_2010_Dec_20_2010_924518.nxml";
+	private static final String TEST_FILE = "AAPS_J_2008_Apr_2_10(1)_193-199.nxml";
+	//private static final String TEST_FILE = "Arthritis_2010_Dec_20_2010_924518.nxml";
 	private final int PERSONS_NUMBER = 3; // number of entities of type foaf:Person extracted from the test file.
 
 
