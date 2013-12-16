@@ -12,9 +12,9 @@
 		<relativePath>../parent</relativePath>
 	</parent-->
 
-	<groupId>eu.fusepool.platform</groupId>
+	<groupId>eu.fusepool</groupId>
 	<artifactId>pubmed_rdfizer</artifactId>
-	<version>0.1.0</version>
+	<version>1.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
 	<name>Fusepool PubMed Articles RDFizer</name>
