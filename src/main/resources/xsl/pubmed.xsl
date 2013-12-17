@@ -19,6 +19,7 @@
     xmlns:property="http://fusepool.info/property/"
     xmlns:schema="http://schema.org/"
     xmlns:bibo="http://purl.org/ontology/bibo/"
+    xmlns:scoro="http://purl.org/spar/scoro/"
     xmlns:xlink="http://www.w3.org/1999/xlink"
     xmlns:mml="http://www.w3.org/1998/Math/MathML"
 
@@ -224,21 +225,26 @@
 
 
     <xsl:template name="contributor">
-<!--        <xsl:param name="pub-id-type"/>-->
-<!--        <xsl:param name="pub-id"/>-->
         <xsl:param name="affiliations" tunnel="yes"/>
 
         <xsl:variable name="pmcid" select="key('pub-id-type', 'pmc')"/>
 
         <xsl:variable name="contributor" select="concat($entityID, uuid:randomUUID())"/>
-<!--        <xsl:variable name="corresp" select="@corresp"/>-->
-<!--        <xsl:variable name="corresp-rid" select="xref[@ref-type = 'corresp']/@rid"/>-->
-
-
             <rdf:Description rdf:about="{$contributor}">
                 <rdf:type rdf:resource="{$foaf}Person"/>
 
-                <foaf:publications rdf:resource="{concat($pmc, $pmcid)}"/>
+                <xsl:choose>
+                    <xsl:when test="@corresp or xref[@ref-type = 'corresp']">
+                        <foaf:publications>
+                            <rdf:Description rdf:about="{concat($pmc, $pmcid)}">
+                                <scoro:corresponding-author rdf:resource="{$contributor}"/>
+                            </rdf:Description>
+                        </foaf:publications>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <foaf:publications rdf:resource="{concat($pmc, $pmcid)}"/>
+                    </xsl:otherwise>
+                </xsl:choose>
 
                 <xsl:for-each select="name">
                     <xsl:if test="given-names and surname">
