@@ -204,13 +204,21 @@
             <xsl:apply-templates select="counts/page-count/@count"/>
             <xsl:apply-templates select="permissions/license/@xlink:href"/>
 
-            <xsl:for-each select="contrib-group/contrib">
-                <xsl:call-template name="contributor"/>
-<!--                    <xsl:with-param name="pub-id-type" select="'pmc'"/>-->
-<!--                    <xsl:with-param name="pub-id" select="key('pub-id-type', 'pmc')"/>-->
-    <!--                <xsl:with-param name="affiliations" select="$affiliations"/>-->
-<!--                </xsl:call-template>-->
-            </xsl:for-each>
+            <bibo:contributorList>
+                <rdf:Description rdf:about="{concat($pmc, $pmcid, '/contributors')}">
+                    <rdf:type resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Seq"/>
+
+                    <xsl:for-each select="contrib-group/contrib">
+                        <rdfs:member>
+                        <xsl:call-template name="contributor"/>
+    <!--                    <xsl:with-param name="pub-id-type" select="'pmc'"/>-->
+    <!--                    <xsl:with-param name="pub-id" select="key('pub-id-type', 'pmc')"/>-->
+        <!--                <xsl:with-param name="affiliations" select="$affiliations"/>-->
+    <!--                </xsl:call-template>-->
+                        </rdfs:member>
+                    </xsl:for-each>
+                </rdf:Description>
+            </bibo:contributorList>
         </xsl:for-each>
     </xsl:template>
 
@@ -226,7 +234,7 @@
 <!--        <xsl:variable name="corresp" select="@corresp"/>-->
 <!--        <xsl:variable name="corresp-rid" select="xref[@ref-type = 'corresp']/@rid"/>-->
 
-        <dcterms:contributor>
+
             <rdf:Description rdf:about="{$contributor}">
                 <rdf:type rdf:resource="{$foaf}Person"/>
 
@@ -254,7 +262,6 @@
                     <schema:affiliation rdf:resource="{$affiliations/rdf:RDF/rdf:Description[rdfs:value=$rid]/@rdf:about}"/>
                 </xsl:for-each>
             </rdf:Description>
-        </dcterms:contributor>
     </xsl:template>
 
 
