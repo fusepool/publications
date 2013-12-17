@@ -207,19 +207,17 @@
 
             <bibo:contributorList>
                 <rdf:Description rdf:about="{concat($pmc, $pmcid, '/contributors')}">
-                    <rdf:type resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Seq"/>
+                    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Seq"/>
 
                     <xsl:for-each select="contrib-group/contrib">
                         <rdfs:member>
-                        <xsl:call-template name="contributor"/>
-    <!--                    <xsl:with-param name="pub-id-type" select="'pmc'"/>-->
-    <!--                    <xsl:with-param name="pub-id" select="key('pub-id-type', 'pmc')"/>-->
-        <!--                <xsl:with-param name="affiliations" select="$affiliations"/>-->
-    <!--                </xsl:call-template>-->
+                            <xsl:call-template name="contributor"/>
                         </rdfs:member>
                     </xsl:for-each>
                 </rdf:Description>
             </bibo:contributorList>
+
+            <xsl:apply-templates select="author-notes"/>
         </xsl:for-each>
     </xsl:template>
 
@@ -228,13 +226,15 @@
         <xsl:param name="affiliations" tunnel="yes"/>
 
         <xsl:variable name="pmcid" select="key('pub-id-type', 'pmc')"/>
+        <xsl:variable name="corresp" select="@corresp"/>
+        <xsl:variable name="corresp-rid" select="xref[@ref-type = 'corresp']/@rid"/>
 
         <xsl:variable name="contributor" select="concat($entityID, uuid:randomUUID())"/>
             <rdf:Description rdf:about="{$contributor}">
                 <rdf:type rdf:resource="{$foaf}Person"/>
 
                 <xsl:choose>
-                    <xsl:when test="@corresp or xref[@ref-type = 'corresp']">
+                    <xsl:when test="$corresp or $corresp-rid">
                         <foaf:publications>
                             <rdf:Description rdf:about="{concat($pmc, $pmcid)}">
                                 <scoro:corresponding-author rdf:resource="{$contributor}"/>
@@ -387,6 +387,14 @@
                 <skos:prefLabel><xsl:value-of select="."/></skos:prefLabel>
             </rdf:Description>
         </dcterms:subject>
+    </xsl:template>
+
+    <xsl:template match="author-notes">
+        <skos:note rdf:parseType="Literal">
+            <div xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+               <xsl:apply-templates/>
+            </div>
+        </skos:note>
     </xsl:template>
 
     <xsl:template match="institution">
