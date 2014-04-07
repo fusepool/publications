@@ -5,19 +5,19 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<!--parent>
+	<parent>
 		<groupId>eu.fusepool</groupId>
 		<artifactId>parent</artifactId>
 		<version>0.1-SNAPSHOT</version>
 		<relativePath>../parent</relativePath>
-	</parent-->
+	</parent>
 
-	<groupId>eu.fusepool</groupId>
+	
 	<artifactId>pubmed_rdfizer</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
-	<name>Fusepool PubMed Articles RDFizer</name>
+	<name>Fusepool Enhancement Engine PubMed Articles to RDF</name>
         <description>
                      Transform XML document from journal articles collected by PubMed into RDF. The transformation is based on XSLT. 
                      The XML elements and attributes are mapped to terms from different ontologies.
@@ -39,12 +39,14 @@
 	    <plugin>
 		<groupId>org.apache.felix</groupId>
 		<artifactId>maven-bundle-plugin</artifactId>
+		<version>2.3.7</version>
 		<extensions>true</extensions>
 		<configuration>
 		   <instructions>
-			<Embed-Dependency>xercesImpl;saxon;xml-resolver;commons-lang3;scope=compile</Embed-Dependency>
+		        <Bundle-Category>Stanbol Enahncement Engine </Bundle-Category>
+			    <Embed-Dependency>xercesImpl;saxon;xml-resolver;commons-lang3;scope=compile</Embed-Dependency>
 		        <Embed-Transitive>true</Embed-Transitive>
-			<Data-Files>data,data/catalog,dtd</Data-Files>
+			    <Data-Files>data,data/catalog,dtd</Data-Files>
 		        <Data-Files-Priority>-100</Data-Files-Priority>
 			<Import-Package>!sun.io.*, * </Import-Package>
 		   </instructions>
@@ -83,8 +85,7 @@
 					<artifactId>xercesImpl</artifactId>
 				</exclusion>
 			</exclusions>
-			<!-- <exclusions> <exclusion> <groupId>org.apache.clerezza</groupId> <artifactId>rdf.jena.serializer</artifactId> 
-				</exclusion> </exclusions> -->
+			
 		</dependency>
 
 
@@ -93,8 +94,7 @@
 			<artifactId>xercesImpl</artifactId>
                         <version>2.9.1</version>
 		</dependency>
-		<!-- <dependency> <groupId>net.sf.saxon</groupId> <artifactId>saxon-xpath</artifactId> 
-			<version>8.7</version> </dependency> -->
+		
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.commons.indexedgraph</artifactId>
@@ -110,25 +110,11 @@
 			<artifactId>commons-io</artifactId>
                         <version>2.4</version>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.scr.annotations</artifactId>
-                        <version>1.7.0</version>
-		</dependency>
+		
 		<dependency>
 			<groupId>org.apache.clerezza</groupId>
 			<artifactId>rdf.core</artifactId>
                         <version>0.13</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-                        <version>1.6.6</version>
 		</dependency>
 		<!-- we need XSLT 2.0 -->
 		<dependency>
@@ -147,9 +133,6 @@
 			<artifactId>xml-resolver</artifactId>
                         <version>1.2</version>
 		</dependency>
-		<!-- <dependency> <groupId>net.sf.saxon</groupId> <artifactId>saxon-dom</artifactId> 
-			<version>9.1.0.8</version> </dependency> -->
-
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
@@ -160,31 +143,12 @@
 			<artifactId>org.apache.stanbol.enhancer.core</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
-
-
 		<!-- Dependencies for testing -->
-		<!-- dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.enhancer.test</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency -->
 		<dependency>
 			<groupId>org.apache.stanbol</groupId>
 			<artifactId>org.apache.stanbol.enhancer.rdfentities</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 			<type>bundle</type>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.entityhub.servicesapi</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.stanbol</groupId>
-			<artifactId>org.apache.stanbol.entityhub.model.clerezza</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -215,12 +179,10 @@
 			<version>0.11</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+            <groupId>eu.fusepool</groupId>
+            <artifactId>datalifecycle</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
 	</dependencies>
-	<!--repositories>
-		<repository>
-			<id>deprecated</id>
-			<name>JBoss Deprecated</name>
-			<url>https://repository.jboss.org/nexus/content/repositories/deprecated</url>
-		</repository>
-	</repositories-->
 </project>
