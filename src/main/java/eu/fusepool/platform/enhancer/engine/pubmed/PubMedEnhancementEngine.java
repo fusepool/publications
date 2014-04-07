@@ -29,6 +29,8 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.stanbol.commons.indexedgraph.IndexedMGraph;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
@@ -48,18 +50,16 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.fusepool.datalifecycle.Rdfizer;
 import eu.fusepool.platform.enhancer.engine.pubmed.OntologiesTerms;
-import eu.fusepool.platform.enhancer.engine.pubmed.xslt.CatalogBuilder;
-import eu.fusepool.platform.enhancer.engine.pubmed.xslt.XMLProcessor;
-import eu.fusepool.platform.enhancer.engine.pubmed.xslt.impl.PubMedXMLProcessor;
-
 
 
 @Component(immediate = true, metatype = true)
 @Service
 @Properties(value={
-		@Property(name=EnhancementEngine.PROPERTY_NAME, value="PubMedEngine"),
-		@Property(name=Constants.SERVICE_RANKING,intValue=PubMedEnhancementEngine.DEFAULT_SERVICE_RANKING)
+		@Property(name=EnhancementEngine.PROPERTY_NAME, value=PubMedEnhancementEngine.DEFAULT_ENGINE_NAME),
+		@Property(name=Constants.SERVICE_RANKING,intValue=PubMedEnhancementEngine.DEFAULT_SERVICE_RANKING),
+		@Property(name="CLEAN_ON_STARTUP", boolValue=false)
 })
 public class PubMedEnhancementEngine 
 extends AbstractEnhancementEngine<IOException,RuntimeException> 
@@ -95,45 +95,67 @@ implements EnhancementEngine, ServiceProperties {
 	static {
 		Set<String> types = new HashSet<String>();
 		//ensure everything is lower case
-//		types.add(SupportedFormat.N3.toLowerCase());
-//		types.add(SupportedFormat.N_TRIPLE.toLowerCase());
-//		types.add(SupportedFormat.RDF_JSON.toLowerCase());
+		types.add(SupportedFormat.N3.toLowerCase());
+		types.add(SupportedFormat.N_TRIPLE.toLowerCase());
+		types.add(SupportedFormat.RDF_JSON.toLowerCase());
 		types.add(SupportedFormat.RDF_XML.toLowerCase());
 		types.add(SupportedFormat.TURTLE.toLowerCase());
-//		types.add(SupportedFormat.X_TURTLE.toLowerCase());
+		types.add(SupportedFormat.X_TURTLE.toLowerCase());
 		supportedMediaTypes = Collections.unmodifiableSet(types);
 	}
 
 	protected ComponentContext componentContext ;
-
-	protected CatalogBuilder catalogBuilder ;
 	
 	
 	@Reference
 	protected Parser parser ;
+	
+	// Binding to pubmed rdfizer
+    @Reference(cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            referenceInterface=eu.fusepool.datalifecycle.Rdfizer.class)
+    private Rdfizer rdfizer;
+    public static final String RDFIZER_NAME = "pubmed";
 	
 
 	//@SuppressWarnings("unchecked")
 	protected void activate(ComponentContext ce) throws IOException, ConfigurationException {
 		super.activate(ce);
 		this.componentContext = ce ;
-		
-		catalogBuilder = new CatalogBuilder(ce.getBundleContext()) ;
-		try {
-			catalogBuilder.build() ;
-		} catch (Exception e1) {
-			logger.error("Error building dtd catalog", e1) ;
-		}
 
-
-		logger.info("activating "+this.getClass().getName());
+		logger.info("PubMedEngine is being activated.");
 
 	}
 
 	protected void deactivate(ComponentContext ce) {
 		super.deactivate(ce);
-		catalogBuilder.cleanupFiles() ;
+		logger.info("PubMedEngine is being deactivated.");
 	}
+	
+	/**
+     * Bind pubmed rdfizer
+     */
+    protected void bindRdfizer(Rdfizer rdfizer) {
+        
+        if( RDFIZER_NAME.equals( rdfizer.getName() ) ) {
+            this.rdfizer = rdfizer; 
+            logger.info("Rdfizer " + rdfizer.getName() + " bound");            
+        }
+        
+    }
+    
+    /**
+     * Unbind pubmed rdfizer
+     */
+    protected void unbindRdfizer(Rdfizer rdfizer) {
+        
+        if( RDFIZER_NAME.equals( rdfizer.getName() ) ) {
+            this.rdfizer = null;
+            logger.info("Rdfizer " + rdfizer.getName() + " unbound");
+            
+        }
+        
+    }
 
 	/*
 	 * Check if content is present and mime type is correct (application/xml).
@@ -172,8 +194,6 @@ implements EnhancementEngine, ServiceProperties {
 		logger.info("UriRef: " + contentItemId.getUnicodeString()) ;
 				
 		try {
-			
-			//ci.getLock().writeLock().lock();
 			
 			// Transform the patent XML file into RDF
 			MGraph xml2rdf = transformXML(ci);
@@ -243,30 +263,15 @@ implements EnhancementEngine, ServiceProperties {
 	/*
 	 * Transform patent XML documents into RDF using an XSLT transformation and add the graph to the content item metadata.
 	 */
-	public MGraph transformXML(ContentItem ci) throws EngineException {
-		
-		MGraph xml2rdf = null;
-		
-		XMLProcessor processor = new PubMedXMLProcessor() ;
-		InputStream rdfIs = null ; 
+	private MGraph transformXML(ContentItem ci) throws EngineException { 
 	
 		logger.debug("Starting transformation from XML to RDF");
 		
-		try {
-			
-			xml2rdf = new IndexedMGraph();
-			rdfIs = processor.processXML(ci.getStream()) ;
-			parser.parse(xml2rdf, rdfIs, SupportedFormat.RDF_XML) ;
-			rdfIs.close() ;
-			
-			
-		} catch (Exception e) {
-			logger.error("Wrong data format for the " + this.getName() + " enhancer.", e) ;			
-		}
+		MGraph documentGraph = rdfizer.transform(ci.getStream());
 		
 		logger.debug("Finished transformation from XML to RDF");
 		
-		return xml2rdf;
+		return documentGraph;
 	}
 	
 	/*
